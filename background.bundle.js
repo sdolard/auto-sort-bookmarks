@@ -19931,12 +19931,23 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
             groupedThemes[m.theme].push(m);
           }
           const sortedThemeNames = Object.keys(groupedThemes).sort((a, b) => a.localeCompare(b));
-          for (const theme of sortedThemeNames) {
-            const folder = await chrome.bookmarks.create({ parentId: rootFolder.id, title: theme });
+          for (let fIdx = 0; fIdx < sortedThemeNames.length; fIdx++) {
+            const theme = sortedThemeNames[fIdx];
+            const folder = await chrome.bookmarks.create({
+              parentId: rootFolder.id,
+              title: theme,
+              index: fIdx
+              // Forcer la position de A à Z (haut vers bas)
+            });
             const bmarks = groupedThemes[theme];
             bmarks.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-            for (const m of bmarks) {
-              await chrome.bookmarks.move(m.id, { parentId: folder.id });
+            for (let bIdx = 0; bIdx < bmarks.length; bIdx++) {
+              const m = bmarks[bIdx];
+              await chrome.bookmarks.move(m.id, {
+                parentId: folder.id,
+                index: bIdx
+                // Forcer la position de A à Z
+              });
               bookmarkCache[m.url] = m.theme;
             }
           }
