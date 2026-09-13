@@ -19877,7 +19877,7 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
                     { role: "system", content: chrome.i18n.getMessage("aiSystem") || "You are a strict system that ONLY returns valid JSON. No markdown." },
                     { role: "user", content: prompt }
                   ],
-                  temperature: 0.1
+                  temperature: 0.4
                 });
                 let content = response.choices[0].message.content.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
                 const classifications = JSON.parse(content);
