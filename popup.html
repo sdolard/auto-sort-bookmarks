@@ -18,17 +18,17 @@
   </style>
 </head>
 <body>
-  <h3>Trieur de Favoris IA</h3>
+  <h3 data-i18n="extName">AI Bookmark Organizer</h3>
   
-  <button id="sortBtn">Générer un aperçu du tri (Rapide)</button>
-  <div class="desc">Ne déplace rien. Ouvre une page pour vérifier les propositions. Utilise le cache.</div>
+  <button id="sortBtn" data-i18n="popupSortBtn">Générer un aperçu du tri</button>
+  <div class="desc" data-i18n="popupSortDesc">Ne déplace rien. Ouvre une page pour vérifier les propositions. Utilise le cache.</div>
   
-  <button id="forceBtn">Forcer une réanalyse complète</button>
-  <div class="desc">Ignore le cache existant pour proposer un nouveau tri de tous les favoris.</div>
+  <button id="forceBtn" data-i18n="popupForceBtn">Forcer l'analyse (Ignorer le cache)</button>
+  <div class="desc" data-i18n="popupForceDesc">Ignore le cache existant pour proposer un nouveau tri de tous les favoris.</div>
   
   <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
   
-  <button id="optionsBtn">Configuration (Clé API & Règles)</button>
+  <button id="optionsBtn" data-i18n="popupConfigBtn">Configuration (Clé API & Règles)</button>
   <div id="status"></div>
   <script src="popup.js"></script>
   <script src="i18n.js"></script>

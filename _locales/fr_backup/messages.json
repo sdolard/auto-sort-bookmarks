@@ -1,0 +1,140 @@
+{
+  "extName": {
+    "message": "AI Bookmark Organizer"
+  },
+  "extDesc": {
+    "message": "Trie et organise automatiquement vos favoris par thématique grâce à l'IA."
+  },
+  "optionsTitle": {
+    "message": "Configuration de l'Extension"
+  },
+  "apiKeyLabel": {
+    "message": "Clé API DeepSeek :"
+  },
+  "apiKeyHelp": {
+    "message": "Nécessaire pour l'analyse par l'IA."
+  },
+  "topCountLabel": {
+    "message": "Garder les favoris les plus visités dans la Barre :"
+  },
+  "topCountHelp": {
+    "message": "Les X favoris les plus cliqués seront placés directement sur la barre de favoris. Mettez 0 pour désactiver."
+  },
+  "overridesLabel": {
+    "message": "Surcharges / Règles Manuelles (Optionnel) :"
+  },
+  "overridesHelp": {
+    "message": "Forcez des thématiques pour certaines adresses web. Format : <code>morceau-url = Thème</code> (un par ligne).<br><em>Le script cherche ce mot dans l'URL (le nom du favori n'a pas d'importance).</em><br>Exemple : <code>github.com = Développement</code><br><strong>Astuce :</strong> Utilisez <code>morceau-url = PIN</code> pour épingler de force un favori sur la barre."
+  },
+  "overridesPlaceholder": {
+    "message": "youtube.com = Vidéos\namazon = Shopping\nmon-site.fr = PIN"
+  },
+  "saveBtn": {
+    "message": "Enregistrer les paramètres"
+  },
+  "saveAndSortBtn": {
+    "message": "Enregistrer & Lancer l'aperçu"
+  },
+  "statusSaved": {
+    "message": "Paramètres enregistrés avec succès !"
+  },
+  "statusErrorApiKey": {
+    "message": "Erreur : Veuillez d'abord saisir une clé API."
+  },
+  "statusGeneratingPreview": {
+    "message": "Génération de l'aperçu en cours..."
+  },
+  "statusFullAnalysis": {
+    "message": "Analyse complète en cours..."
+  },
+  "statusReady": {
+    "message": "Statut : Prêt"
+  },
+  "popupConfigBtn": {
+    "message": "Configuration"
+  },
+  "popupSortBtn": {
+    "message": "Générer un aperçu du tri"
+  },
+  "popupForceBtn": {
+    "message": "Forcer l'analyse (Ignorer le cache)"
+  },
+  "popupMissingKey": {
+    "message": "Veuillez d'abord configurer votre clé API."
+  },
+  "popupForceConfirm": {
+    "message": "Voulez-vous vraiment ignorer le cache et solliciter l'IA pour TOUS les favoris ?"
+  },
+  "previewTitle": {
+    "message": "Aperçu du tri IA"
+  },
+  "previewDesc": {
+    "message": "Voici les propositions de déplacement. Décochez ceux que vous souhaitez ignorer."
+  },
+  "thBookmark": {
+    "message": "Favori"
+  },
+  "thTheme": {
+    "message": "Nouvelle Thématique"
+  },
+  "thSource": {
+    "message": "Origine"
+  },
+  "btnApply": {
+    "message": "Valider et Déplacer"
+  },
+  "btnCancel": {
+    "message": "Annuler"
+  },
+  "statusNoPending": {
+    "message": "Aucune donnée à afficher. Veuillez relancer l'analyse."
+  },
+  "statusApplying": {
+    "message": "Déplacement en cours..."
+  },
+  "statusFinished": {
+    "message": "Terminé ! Vous pouvez fermer cet onglet."
+  },
+  "bgMissingKey": {
+    "message": "Clé API manquante"
+  },
+  "bgFetching": {
+    "message": "Récupération de vos favoris..."
+  },
+  "bgNoBookmarks": {
+    "message": "Aucun favori trouvé."
+  },
+  "bgHistory": {
+    "message": "Analyse de l'historique des visites..."
+  },
+  "bgApiError": {
+    "message": "Erreur API DeepSeek (lot __BATCH__): __MSG__"
+  },
+  "bgAiAnalysis": {
+    "message": "Analyse IA (lot __CUR__/__TOT__)..."
+  },
+  "bgOpeningPreview": {
+    "message": "Ouverture de la page d'aperçu..."
+  },
+  "bgDone": {
+    "message": "Terminé."
+  },
+  "bgUnexpectedError": {
+    "message": "Erreur inattendue : __MSG__"
+  },
+  "bookmarksBar": {
+    "message": "⭐ Barre de favoris"
+  },
+  "aiThemesFolder": {
+    "message": "Thématiques IA - "
+  },
+  "aiPrompt": {
+    "message": "Tu es un expert en classification web. Voici un lot de favoris.\n\nThématiques déjà existantes : [__THEMES__]\n\nCONSIGNES STRICTES:\n1. Pour chaque favori, attribue une thématique pertinente. Tu peux créer des sous-dossiers en utilisant le séparateur '/' si cela a du sens (ex: \"Développement/Javascript\" ou \"Voyage/Hôtels\"). Limite-toi à 2 niveaux maximum.\n2. Utilise les thématiques existantes en priorité.\n3. Sinon, crée une NOUVELLE thématique (générique, 1 à 2 mots, majuscule au début).\n4. UNIQUEMENT du JSON valide au format : [{\"id\": \"...\", \"theme\": \"...\"}]\n\nFavoris:\n__BOOKMARKS__"
+  },
+  "popupSortDesc": {
+    "message": "Ne déplace rien. Ouvre une page pour vérifier les propositions. Utilise le cache."
+  },
+  "popupForceDesc": {
+    "message": "Ignore le cache existant pour proposer un nouveau tri de tous les favoris."
+  }
+}
