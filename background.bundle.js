@@ -19893,6 +19893,26 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
               }
             }
           }
+          let foldersChanged = true;
+          while (foldersChanged) {
+            foldersChanged = false;
+            const themeCounts = {};
+            for (const m of pendingMoves) {
+              if (!m.targetParentId) {
+                themeCounts[m.theme] = (themeCounts[m.theme] || 0) + 1;
+              }
+            }
+            for (const m of pendingMoves) {
+              if (!m.targetParentId && m.theme.includes("/") && m.source !== "override") {
+                if (themeCounts[m.theme] === 1) {
+                  const parts = m.theme.split("/");
+                  parts.pop();
+                  m.theme = parts.join("/");
+                  foldersChanged = true;
+                }
+              }
+            }
+          }
           pendingMoves.sort((a, b) => {
             if (a.targetParentId && !b.targetParentId) return -1;
             if (!a.targetParentId && b.targetParentId) return 1;

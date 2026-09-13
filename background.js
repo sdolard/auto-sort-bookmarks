@@ -190,6 +190,30 @@ ${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}`;
       }
     }
 
+    // Aplatissement des sous-dossiers inutiles (contenant 1 seul favori)
+    let foldersChanged = true;
+    while (foldersChanged) {
+      foldersChanged = false;
+      const themeCounts = {};
+      
+      for (const m of pendingMoves) {
+        if (!m.targetParentId) {
+          themeCounts[m.theme] = (themeCounts[m.theme] || 0) + 1;
+        }
+      }
+
+      for (const m of pendingMoves) {
+        if (!m.targetParentId && m.theme.includes('/') && m.source !== 'override') {
+          if (themeCounts[m.theme] === 1) {
+            const parts = m.theme.split('/');
+            parts.pop(); // Retire le sous-dossier (feuille) inutile
+            m.theme = parts.join('/');
+            foldersChanged = true;
+          }
+        }
+      }
+    }
+
     // Trier les propositions pour que l'affichage dans l'aperçu soit logique et ordonné
     pendingMoves.sort((a, b) => {
       // 1. Les épinglés (Barre de favoris) passent toujours en premier
