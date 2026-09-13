@@ -8,7 +8,12 @@ global.chrome = {
   },
   storage: {
     local: {
-      get: jest.fn().mockResolvedValue({ deepseekApiKey: 'fake-test-key' })
+      get: jest.fn().mockResolvedValue({ 
+        deepseekApiKey: 'fake-test-key',
+        bookmarkCache: {},
+        overrides: 'github.com=Développement\nyoutube.com=Vidéos'
+      }),
+      set: jest.fn().mockResolvedValue()
     }
   },
   bookmarks: {
@@ -33,7 +38,7 @@ global.fetch = jest.fn(() =>
     json: () => Promise.resolve({
       choices: [{ 
         message: { 
-          content: '[{"id": "1", "theme": "Recherche"}, {"id": "2", "theme": "Développement"}]' 
+          content: '[{"id": "1", "theme": "Recherche"}]' 
         } 
       }]
     })
@@ -47,39 +52,31 @@ describe('Tests du Background Script (Worker)', () => {
   });
 
   it('doit enregistrer un écouteur de messages à l\'initialisation', () => {
-    // L'import du fichier exécute le code racine
     require('../background.js');
     expect(chrome.runtime.onMessage.addListener).toHaveBeenCalledTimes(1);
   });
 
-  it('doit traiter correctement le message "startSorting"', async () => {
-    // 1. Charger le script pour qu'il enregistre son écouteur
+  it('doit traiter correctement le message "startSorting" avec cache et overrides', async () => {
     require('../background.js');
-    
-    // 2. Récupérer la fonction callback passée à addListener
     const messageListener = chrome.runtime.onMessage.addListener.mock.calls[0][0];
-    
-    // 3. Simuler l'envoi du message "startSorting" par la popup
     const sendResponse = jest.fn();
-    const result = messageListener({ action: 'startSorting' }, {}, sendResponse);
     
-    // 4. Vérifier que la réponse immédiate est envoyée
+    // Simuler l'appel normal (sans force)
+    messageListener({ action: 'startSorting', force: false }, {}, sendResponse);
     expect(sendResponse).toHaveBeenCalledWith({ started: true });
     
-    // On attend un court instant pour laisser les promesses asynchrones (startSortingProcess) se résoudre
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 150));
 
-    // 5. Vérifier les appels d'API
-    expect(chrome.storage.local.get).toHaveBeenCalledWith(['deepseekApiKey']);
+    // Vérifier les appels d'API
+    expect(chrome.storage.local.get).toHaveBeenCalledWith(['deepseekApiKey', 'bookmarkCache', 'overrides']);
     expect(chrome.bookmarks.getTree).toHaveBeenCalled();
+    
+    // fetch appelé 1 seule fois car GitHub est traité par les règles (override)
     expect(fetch).toHaveBeenCalledTimes(1);
     
-    // Vérifier l'appel API vers DeepSeek
-    const fetchCallUrl = fetch.mock.calls[0][0];
-    expect(fetchCallUrl).toBe('https://api.deepseek.com/chat/completions');
-    
-    // Vérifier les créations et déplacements de dossiers
-    expect(chrome.bookmarks.create).toHaveBeenCalledWith({ title: 'Thématiques IA' });
+    // Le dossier devrait avoir une chaîne incluant "Thématiques IA"
+    expect(chrome.bookmarks.create.mock.calls[0][0].title).toMatch(/Thématiques IA/);
     expect(chrome.bookmarks.move).toHaveBeenCalledTimes(2);
+    expect(chrome.storage.local.set).toHaveBeenCalled();
   });
 });

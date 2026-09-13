@@ -1,17 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Charger la clé existante
-  chrome.storage.local.get(['deepseekApiKey'], (result) => {
-    if (result.deepseekApiKey) {
-      document.getElementById('apiKey').value = result.deepseekApiKey;
-    }
+  // Charger la clé existante et les règles
+  chrome.storage.local.get(['deepseekApiKey', 'overrides'], (result) => {
+    if (result.deepseekApiKey) document.getElementById('apiKey').value = result.deepseekApiKey;
+    if (result.overrides) document.getElementById('overrides').value = result.overrides;
   });
 
-  // Sauvegarder la nouvelle clé
+  // Sauvegarder
   document.getElementById('saveBtn').addEventListener('click', () => {
     const apiKey = document.getElementById('apiKey').value.trim();
-    chrome.storage.local.set({ deepseekApiKey: apiKey }, () => {
+    const overrides = document.getElementById('overrides').value.trim();
+    
+    chrome.storage.local.set({ 
+      deepseekApiKey: apiKey,
+      overrides: overrides
+    }, () => {
       const status = document.getElementById('status');
-      status.textContent = 'Clé API enregistrée avec succès !';
+      status.textContent = 'Paramètres enregistrés avec succès !';
       setTimeout(() => { status.textContent = ''; }, 3000);
     });
   });

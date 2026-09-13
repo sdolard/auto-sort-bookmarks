@@ -4,18 +4,31 @@
   <meta charset="UTF-8">
   <title>DeepSeek Bookmark Organizer</title>
   <style>
-    body { font-family: Arial, sans-serif; width: 300px; padding: 15px; text-align: center; }
-    button { background-color: #007bff; color: white; border: none; padding: 10px 20px; font-size: 14px; cursor: pointer; border-radius: 5px; width: 100%; margin-bottom: 10px;}
-    button:hover { background-color: #0056b3; }
-    button:disabled { background-color: #cccccc; cursor: not-allowed; }
+    body { font-family: Arial, sans-serif; width: 320px; padding: 15px; text-align: center; }
+    button { color: white; border: none; padding: 10px 20px; font-size: 14px; cursor: pointer; border-radius: 5px; width: 100%; margin-bottom: 10px;}
+    button:disabled { background-color: #cccccc !important; cursor: not-allowed; }
+    #sortBtn { background-color: #007bff; }
+    #sortBtn:hover { background-color: #0056b3; }
+    #forceBtn { background-color: #dc3545; }
+    #forceBtn:hover { background-color: #c82333; }
+    #optionsBtn { background-color: #6c757d; }
+    #optionsBtn:hover { background-color: #5a6268; }
     #status { font-size: 13px; color: #555; margin-top: 10px; word-wrap: break-word;}
+    .desc { font-size: 11px; color: #666; margin-bottom: 15px; }
   </style>
 </head>
 <body>
   <h3>Trieur de Favoris IA</h3>
-  <p style="font-size: 12px; color: #666;">Organise vos favoris en thématiques intelligentes avec DeepSeek.</p>
-  <button id="sortBtn">Lancer le tri automatique</button>
-  <button id="optionsBtn" style="background-color: #6c757d;">Configurer la clé API</button>
+  
+  <button id="sortBtn">Trier les favoris (Rapide)</button>
+  <div class="desc">Utilise le cache. Seuls les nouveaux favoris seront envoyés à l'IA.</div>
+  
+  <button id="forceBtn">Forcer une réorganisation complète</button>
+  <div class="desc">Ignore le cache existant (peut prendre plus de temps/requêtes API).</div>
+  
+  <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+  
+  <button id="optionsBtn">Configuration (Clé API & Règles)</button>
   <div id="status"></div>
   <script src="popup.js"></script>
 </body>
