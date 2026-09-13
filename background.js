@@ -137,7 +137,8 @@ async function generateSortingPreview(force = false) {
       toAskAI.push(b);
     }
 
-    let knownThemes = [...new Set(Object.values(bookmarkCache))];
+    const bBarLabel = chrome.i18n.getMessage('bookmarksBar');
+    let knownThemes = force ? [] : [...new Set(Object.values(bookmarkCache))].filter(t => t !== bBarLabel);
 
     if (toAskAI.length > 0) {
       const batchSize = 40;
