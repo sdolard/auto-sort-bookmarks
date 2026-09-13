@@ -108,10 +108,10 @@
     "message": "Analyzing visit history..."
   },
   "bgApiError": {
-    "message": "DeepSeek API Error (batch $BATCH$): $MSG$"
+    "message": "DeepSeek API Error (batch __BATCH__): __MSG__"
   },
   "bgAiAnalysis": {
-    "message": "AI Analysis (batch $CUR$/$TOT$)..."
+    "message": "AI Analysis (batch __CUR__/__TOT__)..."
   },
   "bgOpeningPreview": {
     "message": "Opening preview page..."
@@ -120,7 +120,7 @@
     "message": "Done."
   },
   "bgUnexpectedError": {
-    "message": "Unexpected error: $MSG$"
+    "message": "Unexpected error: __MSG__"
   },
   "bookmarksBar": {
     "message": "⭐ Bookmarks Bar"
@@ -129,6 +129,6 @@
     "message": "AI Themes - "
   },
   "aiPrompt": {
-    "message": "You are an expert in web classification. Here is a batch of bookmarks.\n\nExisting themes: [$THEMES$]\n\nSTRICT INSTRUCTIONS:\n1. For each bookmark, assign a relevant theme. You can create subfolders using the '/' separator if it makes sense (e.g., \"Development/Javascript\" or \"Travel/Hotels\"). Limit to 2 levels maximum.\n2. Use existing themes with priority.\n3. Otherwise, create a NEW theme (generic, 1 to 2 words, capitalized).\n4. Reply ONLY with valid JSON in this format: [{\"id\": \"...\", \"theme\": \"...\"}]\n\nBookmarks:\n$BOOKMARKS$"
+    "message": "You are an expert in web classification. Here is a batch of bookmarks.\n\nExisting themes: [__THEMES__]\n\nSTRICT INSTRUCTIONS:\n1. For each bookmark, assign a relevant theme. You can create subfolders using the '/' separator if it makes sense (e.g., \"Development/Javascript\" or \"Travel/Hotels\"). Limit to 2 levels maximum.\n2. Use existing themes with priority.\n3. Otherwise, create a NEW theme (generic, 1 to 2 words, capitalized).\n4. Reply ONLY with valid JSON in this format: [{\"id\": \"...\", \"theme\": \"...\"}]\n\nBookmarks:\n__BOOKMARKS__"
   }
 }

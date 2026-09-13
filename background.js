@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     currentStatus = "Démarrage...";
     generateSortingPreview(message.force).catch(e => {
       isSorting = false;
-      updateStatus(chrome.i18n.getMessage('bgUnexpectedError').replace('$MSG$', e.message), true);
+      updateStatus(chrome.i18n.getMessage('bgUnexpectedError').replace('__MSG__', e.message), true);
     });
     sendResponse({ started: true });
     return true;
@@ -147,7 +147,7 @@ async function generateSortingPreview(force = false) {
         const batch = toAskAI.slice(i, i + batchSize);
         const currentBatchNum = Math.floor(i / batchSize) + 1;
         
-        await updateStatus(chrome.i18n.getMessage('bgAiAnalysis').replace('$CUR$', currentBatchNum).replace('$TOT$', totalBatches));
+        await updateStatus(chrome.i18n.getMessage('bgAiAnalysis').replace('__CUR__', currentBatchNum).replace('__TOT__', totalBatches));
 
         const prompt = `Tu es un expert en classification web. Voici un lot de favoris.
 
@@ -186,7 +186,7 @@ ${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}`;
             }
           }
         } catch (apiError) {
-          throw new Error(chrome.i18n.getMessage('bgApiError').replace('$BATCH$', currentBatchNum).replace('$MSG$', apiError.message));
+          throw new Error(chrome.i18n.getMessage('bgApiError').replace('__BATCH__', currentBatchNum).replace('__MSG__', apiError.message));
         }
       }
     }
