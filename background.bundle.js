@@ -19893,6 +19893,13 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
               }
             }
           }
+          pendingMoves.sort((a, b) => {
+            if (a.targetParentId && !b.targetParentId) return -1;
+            if (!a.targetParentId && b.targetParentId) return 1;
+            const themeDiff = (a.theme || "").localeCompare(b.theme || "");
+            if (themeDiff !== 0) return themeDiff;
+            return (a.title || "").localeCompare(b.title || "");
+          });
           await updateStatus(`Ouverture de la page d'aper\xE7u...`);
           await chrome.storage.local.set({ pendingMoves });
           chrome.tabs.create({ url: chrome.runtime.getURL("preview.html") });

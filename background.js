@@ -190,6 +190,20 @@ ${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}`;
       }
     }
 
+    // Trier les propositions pour que l'affichage dans l'aperçu soit logique et ordonné
+    pendingMoves.sort((a, b) => {
+      // 1. Les épinglés (Barre de favoris) passent toujours en premier
+      if (a.targetParentId && !b.targetParentId) return -1;
+      if (!a.targetParentId && b.targetParentId) return 1;
+      
+      // 2. Tri alphabétique par Thématique
+      const themeDiff = (a.theme || "").localeCompare(b.theme || "");
+      if (themeDiff !== 0) return themeDiff;
+      
+      // 3. Tri alphabétique par Nom du favori
+      return (a.title || "").localeCompare(b.title || "");
+    });
+
     // Sauvegarder les propositions et ouvrir la page d'aperçu
     await updateStatus(`Ouverture de la page d'aperçu...`);
     await chrome.storage.local.set({ pendingMoves: pendingMoves });
