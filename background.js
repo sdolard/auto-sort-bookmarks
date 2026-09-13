@@ -150,20 +150,16 @@ async function generateSortingPreview(force = false) {
         
         await updateStatus(chrome.i18n.getMessage('bgAiAnalysis').replace('__CUR__', currentBatchNum).replace('__TOT__', totalBatches));
 
-        const prompt = `Tu es un expert en classification web. Voici un lot de favoris.
-
-Thématiques déjà existantes : [${knownThemes.join(', ')}]
-
-CONSIGNES STRICTES :
-1. Pour chaque favori, attribue une thématique pertinente. Tu peux créer des sous-dossiers en utilisant le séparateur '/' si cela a du sens (ex: "Développement/Javascript" ou "Voyage/Hôtels"). Limite-toi à 2 niveaux maximum.
-2. Utilise les thématiques existantes en priorité.
-3. Sinon, crée une NOUVELLE thématique (générique, 1 à 2 mots, majuscule au début).
-4. UNIQUEMENT du JSON valide au format : [{"id": "...", "theme": "..."}]
-
-Favoris :
-${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}`;
+        const promptBase = chrome.i18n.getMessage('aiPrompt');
+        const prompt = promptBase
+          .replace('__THEMES__', knownThemes.join(', '))
+          .replace('__BOOKMARKS__', JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url}))));
 
         try {
+          console.log("=== ENVOI À DEEPSEEK (Batch " + currentBatchNum + ") ===");
+          console.log("System Prompt: ", chrome.i18n.getMessage('aiSystem') || 'You are a strict system that ONLY returns valid JSON. No markdown.');
+          console.log("User Prompt: ", prompt);
+
           const response = await openai.chat.completions.create({
             model: 'deepseek-flash',
             messages: [
@@ -174,6 +170,9 @@ ${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}`;
           });
 
           let content = response.choices[0].message.content.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+          console.log("=== RÉPONSE BRUTE DE DEEPSEEK ===");
+          console.log(content);
+          
           const classifications = JSON.parse(content);
 
           for (const item of classifications) {

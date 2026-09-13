@@ -19858,19 +19858,12 @@ ${underline}`);
               const batch = toAskAI.slice(i, i + batchSize);
               const currentBatchNum = Math.floor(i / batchSize) + 1;
               await updateStatus(chrome.i18n.getMessage("bgAiAnalysis").replace("__CUR__", currentBatchNum).replace("__TOT__", totalBatches));
-              const prompt = `Tu es un expert en classification web. Voici un lot de favoris.
-
-Th\xE9matiques d\xE9j\xE0 existantes : [${knownThemes.join(", ")}]
-
-CONSIGNES STRICTES :
-1. Pour chaque favori, attribue une th\xE9matique pertinente. Tu peux cr\xE9er des sous-dossiers en utilisant le s\xE9parateur '/' si cela a du sens (ex: "D\xE9veloppement/Javascript" ou "Voyage/H\xF4tels"). Limite-toi \xE0 2 niveaux maximum.
-2. Utilise les th\xE9matiques existantes en priorit\xE9.
-3. Sinon, cr\xE9e une NOUVELLE th\xE9matique (g\xE9n\xE9rique, 1 \xE0 2 mots, majuscule au d\xE9but).
-4. UNIQUEMENT du JSON valide au format : [{"id": "...", "theme": "..."}]
-
-Favoris :
-${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`;
+              const promptBase = chrome.i18n.getMessage("aiPrompt");
+              const prompt = promptBase.replace("__THEMES__", knownThemes.join(", ")).replace("__BOOKMARKS__", JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url }))));
               try {
+                console.log("=== ENVOI \xC0 DEEPSEEK (Batch " + currentBatchNum + ") ===");
+                console.log("System Prompt: ", chrome.i18n.getMessage("aiSystem") || "You are a strict system that ONLY returns valid JSON. No markdown.");
+                console.log("User Prompt: ", prompt);
                 const response = await openai.chat.completions.create({
                   model: "deepseek-flash",
                   messages: [
@@ -19880,6 +19873,8 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
                   temperature: 0.4
                 });
                 let content = response.choices[0].message.content.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
+                console.log("=== R\xC9PONSE BRUTE DE DEEPSEEK ===");
+                console.log(content);
                 const classifications = JSON.parse(content);
                 for (const item of classifications) {
                   const { id, theme } = item;
