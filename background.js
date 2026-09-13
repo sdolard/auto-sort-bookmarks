@@ -17,10 +17,11 @@ async function updateStatus(statusText, done = false) {
 
 async function generateSortingPreview(force = false) {
   try {
-    const data = await chrome.storage.local.get(['deepseekApiKey', 'bookmarkCache', 'overrides']);
+    const data = await chrome.storage.local.get(['deepseekApiKey', 'bookmarkCache', 'overrides', 'topCount']);
     const deepseekApiKey = data.deepseekApiKey;
     let bookmarkCache = data.bookmarkCache || {};
     const overridesText = data.overrides || "";
+    const topCount = data.topCount !== undefined ? parseInt(data.topCount) : 10;
     
     if (!deepseekApiKey) throw new Error("Clé API manquante");
     if (force) bookmarkCache = {};
@@ -40,7 +41,7 @@ async function generateSortingPreview(force = false) {
     await updateStatus("Récupération de vos favoris...");
     
     const tree = await chrome.bookmarks.getTree();
-    const allBookmarks = [];
+    let allBookmarks = [];
     function extractUrls(node) {
       if (node.url) {
         allBookmarks.push({ id: node.id, title: node.title, url: node.url, parentId: node.parentId });
@@ -54,11 +55,42 @@ async function generateSortingPreview(force = false) {
       return;
     }
 
+    if (topCount > 0) {
+      await updateStatus("Analyse de l'historique des visites...");
+      const visitsPromises = allBookmarks.map(async (b) => {
+        try {
+          const visits = await chrome.history.getVisits({ url: b.url });
+          b.visitCount = visits.length;
+        } catch(e) {
+          b.visitCount = 0;
+        }
+        return b;
+      });
+      await Promise.all(visitsPromises);
+      
+      // Trier par nombre de visites décroissant
+      allBookmarks.sort((a, b) => b.visitCount - a.visitCount);
+    }
+
     const toAskAI = [];
     const pendingMoves = []; 
 
-    for (const b of allBookmarks) {
+    for (let index = 0; index < allBookmarks.length; index++) {
+      const b = allBookmarks[index];
       const urlLower = b.url.toLowerCase();
+
+      // Gestion du top favoris
+      if (topCount > 0 && index < topCount && b.visitCount > 0) {
+        pendingMoves.push({ 
+          id: b.id, 
+          title: b.title, 
+          url: b.url, 
+          theme: "⭐ Barre de favoris", 
+          source: 'history',
+          targetParentId: '1' // ID standard de la barre de favoris Chrome
+        });
+        continue;
+      }
       
       let matchedOverride = false;
       for (const [keyword, theme] of overrideRules) {
@@ -155,17 +187,22 @@ async function applyValidatedMoves(moves) {
     const themeFolders = {}; 
     
     for (const move of moves) {
-      // S'assurer que le dossier thématique existe
-      if (!themeFolders[move.theme]) {
-        const folder = await chrome.bookmarks.create({ parentId: rootFolder.id, title: move.theme });
-        themeFolders[move.theme] = folder.id;
+      if (move.targetParentId) {
+        // Déplacement direct (ex: Barre de favoris)
+        await chrome.bookmarks.move(move.id, { parentId: move.targetParentId });
+      } else {
+        // S'assurer que le dossier thématique existe
+        if (!themeFolders[move.theme]) {
+          const folder = await chrome.bookmarks.create({ parentId: rootFolder.id, title: move.theme });
+          themeFolders[move.theme] = folder.id;
+        }
+        
+        // Déplacer le favori vers le dossier thématique
+        await chrome.bookmarks.move(move.id, { parentId: themeFolders[move.theme] });
+        
+        // Ajouter au cache local pour les futurs tris (uniquement les dossiers thématiques)
+        bookmarkCache[move.url] = move.theme;
       }
-      
-      // Déplacer le favori
-      await chrome.bookmarks.move(move.id, { parentId: themeFolders[move.theme] });
-      
-      // Ajouter au cache local pour les futurs tris
-      bookmarkCache[move.url] = move.theme;
     }
 
     // Sauvegarder le cache mis à jour et vider les pendingMoves

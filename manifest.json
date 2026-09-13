@@ -5,7 +5,8 @@
   "description": "Trie et organise automatiquement vos favoris par thématique grâce à l'IA DeepSeek.",
   "permissions": [
     "bookmarks",
-    "storage"
+    "storage",
+    "history"
   ],
   "host_permissions": [
     "https://api.deepseek.com/*"

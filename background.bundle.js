@@ -19756,10 +19756,11 @@ ${underline}`);
             }
             if (node.children) node.children.forEach(extractUrls);
           };
-          const data = await chrome.storage.local.get(["deepseekApiKey", "bookmarkCache", "overrides"]);
+          const data = await chrome.storage.local.get(["deepseekApiKey", "bookmarkCache", "overrides", "topCount"]);
           const deepseekApiKey = data.deepseekApiKey;
           let bookmarkCache = data.bookmarkCache || {};
           const overridesText = data.overrides || "";
+          const topCount = data.topCount !== void 0 ? parseInt(data.topCount) : 10;
           if (!deepseekApiKey) throw new Error("Cl\xE9 API manquante");
           if (force) bookmarkCache = {};
           const openai = new OpenAI({
@@ -19770,16 +19771,43 @@ ${underline}`);
           const overrideRules = overridesText.split("\n").map((line) => line.split("=")).filter((parts) => parts.length === 2).map(([key, value]) => [key.trim().toLowerCase(), value.trim()]);
           await updateStatus("R\xE9cup\xE9ration de vos favoris...");
           const tree = await chrome.bookmarks.getTree();
-          const allBookmarks = [];
+          let allBookmarks = [];
           extractUrls(tree[0]);
           if (allBookmarks.length === 0) {
             await updateStatus("Aucun favori trouv\xE9.", true);
             return;
           }
+          if (topCount > 0) {
+            await updateStatus("Analyse de l'historique des visites...");
+            const visitsPromises = allBookmarks.map(async (b) => {
+              try {
+                const visits = await chrome.history.getVisits({ url: b.url });
+                b.visitCount = visits.length;
+              } catch (e) {
+                b.visitCount = 0;
+              }
+              return b;
+            });
+            await Promise.all(visitsPromises);
+            allBookmarks.sort((a, b) => b.visitCount - a.visitCount);
+          }
           const toAskAI = [];
           const pendingMoves = [];
-          for (const b of allBookmarks) {
+          for (let index = 0; index < allBookmarks.length; index++) {
+            const b = allBookmarks[index];
             const urlLower = b.url.toLowerCase();
+            if (topCount > 0 && index < topCount && b.visitCount > 0) {
+              pendingMoves.push({
+                id: b.id,
+                title: b.title,
+                url: b.url,
+                theme: "\u2B50 Barre de favoris",
+                source: "history",
+                targetParentId: "1"
+                // ID standard de la barre de favoris Chrome
+              });
+              continue;
+            }
             let matchedOverride = false;
             for (const [keyword, theme] of overrideRules) {
               if (urlLower.includes(keyword)) {
@@ -19856,12 +19884,16 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
           const rootFolder = await chrome.bookmarks.create({ title: "Th\xE9matiques IA - " + (/* @__PURE__ */ new Date()).toLocaleTimeString() });
           const themeFolders = {};
           for (const move of moves) {
-            if (!themeFolders[move.theme]) {
-              const folder = await chrome.bookmarks.create({ parentId: rootFolder.id, title: move.theme });
-              themeFolders[move.theme] = folder.id;
+            if (move.targetParentId) {
+              await chrome.bookmarks.move(move.id, { parentId: move.targetParentId });
+            } else {
+              if (!themeFolders[move.theme]) {
+                const folder = await chrome.bookmarks.create({ parentId: rootFolder.id, title: move.theme });
+                themeFolders[move.theme] = folder.id;
+              }
+              await chrome.bookmarks.move(move.id, { parentId: themeFolders[move.theme] });
+              bookmarkCache[move.url] = move.theme;
             }
-            await chrome.bookmarks.move(move.id, { parentId: themeFolders[move.theme] });
-            bookmarkCache[move.url] = move.theme;
           }
           await chrome.storage.local.set({ bookmarkCache, pendingMoves: [] });
           async function cleanNode(node) {

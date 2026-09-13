@@ -33,6 +33,9 @@ global.chrome = {
     create: jest.fn().mockResolvedValue({ id: 'folder-ai' }),
     move: jest.fn().mockResolvedValue()
   },
+  history: {
+    getVisits: jest.fn().mockResolvedValue([])
+  },
   tabs: {
     create: jest.fn()
   }
