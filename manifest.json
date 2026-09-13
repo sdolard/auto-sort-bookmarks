@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "DeepSeek Bookmark Organizer",
+  "version": "1.0",
+  "description": "Trie et organise automatiquement vos favoris par thématique grâce à l'IA DeepSeek.",
+  "permissions": [
+    "bookmarks",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://api.deepseek.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Organiser les favoris"
+  },
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js"
+  }
+}

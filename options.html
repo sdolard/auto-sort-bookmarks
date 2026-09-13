@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Options - DeepSeek Bookmark Organizer</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; }
+    label { font-weight: bold; }
+    input[type="text"], input[type="password"] { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 15px; }
+    button { background-color: #4CAF50; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; }
+    button:hover { background-color: #45a049; }
+    #status { margin-top: 10px; color: green; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h2>Configuration de l'API DeepSeek</h2>
+  <label for="apiKey">Clé API DeepSeek :</label>
+  <input type="password" id="apiKey" placeholder="sk-..." />
+  <button id="saveBtn">Enregistrer</button>
+  <div id="status"></div>
+  <script src="options.js"></script>
+</body>
+</html>
