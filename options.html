@@ -27,9 +27,10 @@
 
   <label for="overrides">Surcharges / Règles Manuelles (Optionnel) :</label>
   <div class="help">
-    Forcez des thématiques par mots-clés. Format : <code>mot-clé = Thème</code> (un par ligne).<br>
+    Forcez des thématiques pour certaines adresses web. Format : <code>morceau-url = Thème</code> (un par ligne).<br>
+    <em>Le script cherche ce mot dans l'URL (le nom du favori n'a pas d'importance).</em><br>
     Exemple : <code>github.com = Développement</code><br>
-    <strong>Astuce :</strong> Utilisez <code>mot-clé = PIN</code> pour épingler de force un favori sur la barre.
+    <strong>Astuce :</strong> Utilisez <code>morceau-url = PIN</code> pour épingler de force un favori sur la barre.
   </div>
   <textarea id="overrides" placeholder="youtube.com = Vidéos&#10;amazon = Shopping&#10;mon-site.fr = PIN"></textarea>
 
