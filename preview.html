@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Aperçu du Tri - AI Bookmark Organizer</title>
+  <title data-i18n="previewTitle">Aperçu du Tri - AI Bookmark Organizer</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; max-width: 900px; margin: auto; background-color: #f9f9f9;}
     .container { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -23,26 +23,26 @@
 </head>
 <body>
   <div class="container">
-    <h2>Aperçu de la réorganisation</h2>
-    <p>Voici les propositions de tri. Décochez les éléments que vous ne souhaitez pas déplacer, puis validez.</p>
+    <h2 data-i18n="previewTitle">Aperçu de la réorganisation</h2>
+    <p data-i18n="previewDesc">Voici les propositions de tri. Décochez les éléments que vous ne souhaitez pas déplacer, puis validez.</p>
     
     <table>
       <thead>
         <tr>
           <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAll" checked></th>
           <th data-i18n="thBookmark">Favori</th>
-          <th>Nouveau Dossier (Thème)</th>
-          <th>Origine de la décision</th>
+          <th data-i18n="thTheme">Nouveau Dossier (Thème)</th>
+          <th data-i18n="thSource">Origine de la décision</th>
         </tr>
       </thead>
       <tbody id="previewTable">
-        <tr><td colspan="4" style="text-align:center;">Chargement des propositions...</td></tr>
+        <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
       </tbody>
     </table>
 
     <div class="actions">
-      <button id="cancelBtn">Annuler</button>
-      <button id="applyBtn">Valider et Déplacer</button>
+      <button id="cancelBtn" data-i18n="btnCancel">Annuler</button>
+      <button id="applyBtn" data-i18n="btnApply">Valider et Déplacer</button>
     </div>
     <div id="status" style="margin-top: 15px; color: #28a745; text-align: right; font-weight: bold;"></div>
   </div>
