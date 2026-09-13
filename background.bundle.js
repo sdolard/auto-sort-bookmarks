@@ -19872,7 +19872,7 @@ Favoris :
 ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`;
               try {
                 const response = await openai.chat.completions.create({
-                  model: "DeepSeek-V4.1-Flash",
+                  model: "deepseek-flash",
                   messages: [
                     { role: "system", content: chrome.i18n.getMessage("aiSystem") || "You are a strict system that ONLY returns valid JSON. No markdown." },
                     { role: "user", content: prompt }
