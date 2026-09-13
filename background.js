@@ -98,7 +98,7 @@ ${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}`;
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${deepseekApiKey}` },
           body: JSON.stringify({
-            model: 'deepseek-chat',
+            model: 'deepseek-v4.1-flash',
             messages: [
               { role: 'system', content: 'Tu es un système strict qui ne renvoie QUE du JSON valide. Pas de markdown.' },
               { role: 'user', content: prompt }
