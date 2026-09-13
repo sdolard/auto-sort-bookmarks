@@ -129,7 +129,7 @@
     "message": "AI Themes - "
   },
   "aiPrompt": {
-    "message": "You are an expert in web classification. Here is a batch of bookmarks.\n\nExisting themes: [__THEMES__]\n\nSTRICT INSTRUCTIONS:\n1. For each bookmark, assign a relevant theme. You can create subfolders using the \"/\" separator if it makes sense. Limit to 2 levels maximum.\n2. Use existing themes with priority.\n3. YOU MUST TRANSLATE AND GENERATE ALL NEW THEMES IN ENGLISH ONLY. EVEN IF THE BOOKMARK TITLE OR URL IS IN FRENCH, THE THEME NAME MUST BE STRICTLY IN ENGLISH (e.g., \"News\", \"Shopping\", \"Travel\"). NEVER OUTPUT FRENCH THEMES.\n4. Reply ONLY with valid JSON in this format: [{\"id\": \"...\", \"theme\": \"...\"}]\n\nBookmarks:\n__BOOKMARKS__"
+    "message": "You are a web classification AI.\n\nExisting categories: [__THEMES__]\n\nRULES:\n1. Assign a category to each bookmark (max 2 levels, e.g. \"Tech/AI\").\n2. The category name MUST be in English (e.g. \"News\", \"Shopping\", \"Travel\").\n3. Even if the bookmark title is in another language, the category MUST be an English word.\n4. Output ONLY valid JSON: [{\"id\": \"...\", \"theme\": \"EnglishCategoryName\"}]\n\nBookmarks:\n__BOOKMARKS__"
   },
   "popupSortDesc": {
     "message": "Does not move anything. Opens a page to verify proposals. Uses cache."
