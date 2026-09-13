@@ -1,9 +1,25 @@
 import OpenAI from 'openai';
 
+let isSorting = false;
+let currentStatus = "";
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'startSorting') {
-    generateSortingPreview(message.force);
+  if (message.action === 'getStatus') {
+    sendResponse({ isSorting: isSorting, currentStatus: currentStatus });
+    return true;
+  } else if (message.action === 'startSorting') {
+    if (isSorting) {
+      sendResponse({ started: false });
+      return true;
+    }
+    isSorting = true;
+    currentStatus = "Démarrage...";
+    generateSortingPreview(message.force).catch(e => {
+      isSorting = false;
+      updateStatus(`Erreur inattendue : ${e.message}`, true);
+    });
     sendResponse({ started: true });
+    return true;
   } else if (message.action === 'applyMoves') {
     applyValidatedMoves(message.moves).then(() => sendResponse({ done: true }));
     return true; 
@@ -12,6 +28,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function updateStatus(statusText, done = false) {
+  currentStatus = statusText;
+  if (done) isSorting = false;
   chrome.runtime.sendMessage({ action: 'updateStatus', status: statusText, done: done }).catch(() => {});
 }
 

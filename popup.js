@@ -4,6 +4,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const optionsBtn = document.getElementById('optionsBtn');
   const statusDiv = document.getElementById('status');
 
+  // Vérifier si un tri est déjà en cours
+  chrome.runtime.sendMessage({ action: 'getStatus' }, (response) => {
+    if (response && response.isSorting) {
+      statusDiv.textContent = response.currentStatus || 'Tri en cours...';
+      statusDiv.className = 'status processing';
+      sortBtn.disabled = true;
+      forceBtn.disabled = true;
+    }
+  });
+
   optionsBtn.addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
   });

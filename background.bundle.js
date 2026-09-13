@@ -19734,10 +19734,25 @@ ${underline}`);
   var require_background = __commonJS({
     "background.js"() {
       init_openai();
+      var isSorting = false;
+      var currentStatus = "";
       chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        if (message.action === "startSorting") {
-          generateSortingPreview(message.force);
+        if (message.action === "getStatus") {
+          sendResponse({ isSorting, currentStatus });
+          return true;
+        } else if (message.action === "startSorting") {
+          if (isSorting) {
+            sendResponse({ started: false });
+            return true;
+          }
+          isSorting = true;
+          currentStatus = "D\xE9marrage...";
+          generateSortingPreview(message.force).catch((e) => {
+            isSorting = false;
+            updateStatus(`Erreur inattendue : ${e.message}`, true);
+          });
           sendResponse({ started: true });
+          return true;
         } else if (message.action === "applyMoves") {
           applyValidatedMoves(message.moves).then(() => sendResponse({ done: true }));
           return true;
@@ -19745,6 +19760,8 @@ ${underline}`);
         return true;
       });
       async function updateStatus(statusText, done = false) {
+        currentStatus = statusText;
+        if (done) isSorting = false;
         chrome.runtime.sendMessage({ action: "updateStatus", status: statusText, done }).catch(() => {
         });
       }
