@@ -129,7 +129,7 @@
     "message": "AI Themes - "
   },
   "aiPrompt": {
-    "message": "You are an expert in web classification. Here is a batch of bookmarks.\n\nExisting themes: [__THEMES__]\n\nSTRICT INSTRUCTIONS:\n1. For each bookmark, assign a relevant theme. You can create subfolders using the '/' separator if it makes sense (e.g., \"Development/Javascript\" or \"Travel/Hotels\"). Limit to 2 levels maximum.\n2. Use existing themes with priority.\n3. Otherwise, create a NEW theme (generic, 1 to 2 words, capitalized).\n4. Reply ONLY with valid JSON in this format: [{\"id\": \"...\", \"theme\": \"...\"}]\n\nBookmarks:\n__BOOKMARKS__"
+    "message": "You are an expert in web classification. Here is a batch of bookmarks.\n\nExisting themes: [__THEMES__]\n\nSTRICT INSTRUCTIONS:\n1. For each bookmark, assign a relevant theme. You can create subfolders using the \"/\" separator if it makes sense (e.g., \"Development/Javascript\" or \"Travel/Hotels\"). Limit to 2 levels maximum.\n2. Use existing themes with priority.\n3. Otherwise, create a NEW theme (generic, 1 to 2 words, capitalized, IN ENGLISH).\n4. Reply ONLY with valid JSON in this format: [{\"id\": \"...\", \"theme\": \"...\"}]\n\nBookmarks:\n__BOOKMARKS__"
   },
   "popupSortDesc": {
     "message": "Does not move anything. Opens a page to verify proposals. Uses cache."

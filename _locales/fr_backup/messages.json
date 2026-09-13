@@ -129,7 +129,7 @@
     "message": "Thématiques IA - "
   },
   "aiPrompt": {
-    "message": "Tu es un expert en classification web. Voici un lot de favoris.\n\nThématiques déjà existantes : [__THEMES__]\n\nCONSIGNES STRICTES:\n1. Pour chaque favori, attribue une thématique pertinente. Tu peux créer des sous-dossiers en utilisant le séparateur '/' si cela a du sens (ex: \"Développement/Javascript\" ou \"Voyage/Hôtels\"). Limite-toi à 2 niveaux maximum.\n2. Utilise les thématiques existantes en priorité.\n3. Sinon, crée une NOUVELLE thématique (générique, 1 à 2 mots, majuscule au début).\n4. UNIQUEMENT du JSON valide au format : [{\"id\": \"...\", \"theme\": \"...\"}]\n\nFavoris:\n__BOOKMARKS__"
+    "message": "Tu es un expert en classification web. Voici un lot de favoris.\n\nThématiques déjà existantes : [__THEMES__]\n\nCONSIGNES STRICTES:\n1. Pour chaque favori, attribue une thématique pertinente. Tu peux créer des sous-dossiers en utilisant le séparateur \"/\" si cela a du sens (ex: \"Développement/Javascript\" ou \"Voyage/Hôtels\"). Limite-toi à 2 niveaux maximum.\n2. Utilise les thématiques existantes en priorité.\n3. Sinon, crée une NOUVELLE thématique (générique, 1 à 2 mots, majuscule au début, EN FRANÇAIS).\n4. UNIQUEMENT du JSON valide au format : [{\"id\": \"...\", \"theme\": \"...\"}]\n\nFavoris:\n__BOOKMARKS__"
   },
   "popupSortDesc": {
     "message": "Ne déplace rien. Ouvre une page pour vérifier les propositions. Utilise le cache."
