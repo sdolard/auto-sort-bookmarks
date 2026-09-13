@@ -136,5 +136,17 @@
   },
   "popupForceDesc": {
     "message": "Ignore le cache existant pour proposer un nouveau tri de tous les favoris."
+  },
+  "badgeAI": {
+    "message": "🤖 IA DeepSeek"
+  },
+  "badgeCache": {
+    "message": "⚡ Cache Local"
+  },
+  "badgeHistory": {
+    "message": "🕒 Top Historique"
+  },
+  "badgeOverride": {
+    "message": "⚙️ Règle Manuelle"
   }
 }

@@ -136,5 +136,17 @@
   },
   "popupForceDesc": {
     "message": "Ignores the existing cache to propose a fresh sort for all bookmarks."
+  },
+  "badgeAI": {
+    "message": "🤖 DeepSeek AI"
+  },
+  "badgeCache": {
+    "message": "⚡ Local Cache"
+  },
+  "badgeHistory": {
+    "message": "🕒 Top History"
+  },
+  "badgeOverride": {
+    "message": "⚙️ Manual Rule"
   }
 }

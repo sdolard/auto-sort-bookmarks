@@ -46,10 +46,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const tdSource = document.createElement('td');
       let sourceText = '';
       let sourceClass = '';
-      if (move.source === 'ai') { sourceText = '✨ IA (DeepSeek)'; sourceClass = 'source-ai'; }
-      else if (move.source === 'cache') { sourceText = '💾 Cache Local'; sourceClass = 'source-cache'; }
-      else if (move.source === 'override') { sourceText = '⚙️ Règle Manuelle'; sourceClass = 'source-override'; }
-      
+      switch (move.source) {
+        case 'ai':
+          sourceText = chrome.i18n.getMessage('badgeAI');
+          sourceClass = 'source-ai';
+          break;
+        case 'cache':
+          sourceText = chrome.i18n.getMessage('badgeCache');
+          sourceClass = 'source-cache';
+          break;
+        case 'history':
+          sourceText = chrome.i18n.getMessage('badgeHistory');
+          sourceClass = 'source-ai';
+          break;
+        case 'override':
+          sourceText = chrome.i18n.getMessage('badgeOverride');
+          sourceClass = 'source-override';
+          break;
+        default:
+          sourceText = move.source;
+          sourceClass = '';
+      }
       tdSource.innerHTML = `<span class="${sourceClass}">${sourceText}</span>`;
 
       tr.appendChild(tdCheck);
