@@ -113,7 +113,8 @@ async function generateSortingPreview(force = false) {
       let matchedOverride = false;
       for (const [keyword, theme] of overrideRules) {
         if (urlLower.includes(keyword)) {
-          const isPinned = theme === 'pin' || theme === 'barre';
+          const themeLower = theme.toLowerCase();
+          const isPinned = themeLower === 'pin' || themeLower === 'barre';
           pendingMoves.push({ 
             id: b.id, 
             title: b.title, 
