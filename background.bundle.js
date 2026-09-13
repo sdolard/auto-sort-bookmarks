@@ -19906,18 +19906,38 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
         try {
           const data = await chrome.storage.local.get(["bookmarkCache"]);
           const bookmarkCache = data.bookmarkCache || {};
+          const pinnedMoves = moves.filter((m) => m.targetParentId);
+          const themeMoves = moves.filter((m) => !m.targetParentId);
+          for (const m of pinnedMoves) {
+            try {
+              const visits = await chrome.history.getVisits({ url: m.url });
+              m.visitCount = visits.length;
+            } catch (e) {
+              m.visitCount = 0;
+            }
+          }
+          pinnedMoves.sort((a, b) => b.visitCount - a.visitCount);
+          for (let i = 0; i < pinnedMoves.length; i++) {
+            await chrome.bookmarks.move(pinnedMoves[i].id, {
+              parentId: pinnedMoves[i].targetParentId,
+              index: i
+              // Place au tout début (à gauche) de la barre
+            });
+          }
           const rootFolder = await chrome.bookmarks.create({ title: "Th\xE9matiques IA - " + (/* @__PURE__ */ new Date()).toLocaleTimeString() });
-          const themeFolders = {};
-          for (const move of moves) {
-            if (move.targetParentId) {
-              await chrome.bookmarks.move(move.id, { parentId: move.targetParentId });
-            } else {
-              if (!themeFolders[move.theme]) {
-                const folder = await chrome.bookmarks.create({ parentId: rootFolder.id, title: move.theme });
-                themeFolders[move.theme] = folder.id;
-              }
-              await chrome.bookmarks.move(move.id, { parentId: themeFolders[move.theme] });
-              bookmarkCache[move.url] = move.theme;
+          const groupedThemes = {};
+          for (const m of themeMoves) {
+            if (!groupedThemes[m.theme]) groupedThemes[m.theme] = [];
+            groupedThemes[m.theme].push(m);
+          }
+          const sortedThemeNames = Object.keys(groupedThemes).sort((a, b) => a.localeCompare(b));
+          for (const theme of sortedThemeNames) {
+            const folder = await chrome.bookmarks.create({ parentId: rootFolder.id, title: theme });
+            const bmarks = groupedThemes[theme];
+            bmarks.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+            for (const m of bmarks) {
+              await chrome.bookmarks.move(m.id, { parentId: folder.id });
+              bookmarkCache[m.url] = m.theme;
             }
           }
           await chrome.storage.local.set({ bookmarkCache, pendingMoves: [] });

@@ -208,27 +208,52 @@ async function applyValidatedMoves(moves) {
     const data = await chrome.storage.local.get(['bookmarkCache']);
     const bookmarkCache = data.bookmarkCache || {};
     
-    // Créer un dossier principal daté pour cette session
+    // SÉPARATION DES MOUVEMENTS
+    const pinnedMoves = moves.filter(m => m.targetParentId);
+    const themeMoves = moves.filter(m => !m.targetParentId);
+
+    // 1. BARRE DE FAVORIS : Tri par fréquence d'usage
+    for (const m of pinnedMoves) {
+       try {
+         const visits = await chrome.history.getVisits({ url: m.url });
+         m.visitCount = visits.length;
+       } catch(e) { m.visitCount = 0; }
+    }
+    // Ordre décroissant (le plus utilisé en premier)
+    pinnedMoves.sort((a, b) => b.visitCount - a.visitCount);
+
+    // Déplacement indexé
+    for (let i = 0; i < pinnedMoves.length; i++) {
+       await chrome.bookmarks.move(pinnedMoves[i].id, {
+           parentId: pinnedMoves[i].targetParentId,
+           index: i // Place au tout début (à gauche) de la barre
+       });
+    }
+
+    // 2. DOSSIERS THÉMATIQUES : Tri alphabétique
     const rootFolder = await chrome.bookmarks.create({ title: "Thématiques IA - " + new Date().toLocaleTimeString() });
-    const themeFolders = {}; 
     
-    for (const move of moves) {
-      if (move.targetParentId) {
-        // Déplacement direct (ex: Barre de favoris)
-        await chrome.bookmarks.move(move.id, { parentId: move.targetParentId });
-      } else {
-        // S'assurer que le dossier thématique existe
-        if (!themeFolders[move.theme]) {
-          const folder = await chrome.bookmarks.create({ parentId: rootFolder.id, title: move.theme });
-          themeFolders[move.theme] = folder.id;
-        }
-        
-        // Déplacer le favori vers le dossier thématique
-        await chrome.bookmarks.move(move.id, { parentId: themeFolders[move.theme] });
-        
-        // Ajouter au cache local pour les futurs tris (uniquement les dossiers thématiques)
-        bookmarkCache[move.url] = move.theme;
-      }
+    // Grouper par thème
+    const groupedThemes = {};
+    for (const m of themeMoves) {
+       if (!groupedThemes[m.theme]) groupedThemes[m.theme] = [];
+       groupedThemes[m.theme].push(m);
+    }
+
+    // Créer les dossiers par ordre alphabétique
+    const sortedThemeNames = Object.keys(groupedThemes).sort((a, b) => a.localeCompare(b));
+
+    for (const theme of sortedThemeNames) {
+       const folder = await chrome.bookmarks.create({ parentId: rootFolder.id, title: theme });
+       
+       // Trier les favoris dans le dossier par ordre alphabétique
+       const bmarks = groupedThemes[theme];
+       bmarks.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+       
+       for (const m of bmarks) {
+          await chrome.bookmarks.move(m.id, { parentId: folder.id });
+          bookmarkCache[m.url] = m.theme;
+       }
     }
 
     // Sauvegarder le cache mis à jour et vider les pendingMoves
