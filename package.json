@@ -19,6 +19,13 @@
   },
   "homepage": "https://github.com/sdolard/auto-sort-bookmarks#readme",
   "devDependencies": {
+    "@babel/core": "^8.0.5",
+    "@babel/preset-env": "^8.0.5",
+    "babel-jest": "^30.5.1",
+    "esbuild": "^0.28.2",
     "jest": "^30.5.1"
+  },
+  "dependencies": {
+    "openai": "^7.15.0"
   }
 }

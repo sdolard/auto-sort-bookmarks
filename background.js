@@ -1,10 +1,12 @@
+import OpenAI from 'openai';
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'startSorting') {
     generateSortingPreview(message.force);
     sendResponse({ started: true });
   } else if (message.action === 'applyMoves') {
     applyValidatedMoves(message.moves).then(() => sendResponse({ done: true }));
-    return true; // Asynchrone
+    return true; 
   }
   return true; 
 });
@@ -22,6 +24,13 @@ async function generateSortingPreview(force = false) {
     
     if (!deepseekApiKey) throw new Error("Clé API manquante");
     if (force) bookmarkCache = {};
+
+    // Initialiser le client OpenAI pour DeepSeek
+    const openai = new OpenAI({
+      baseURL: 'https://api.deepseek.com',
+      apiKey: deepseekApiKey,
+      dangerouslyAllowBrowser: true
+    });
 
     const overrideRules = overridesText.split('\n')
       .map(line => line.split('='))
@@ -94,37 +103,31 @@ CONSIGNES STRICTES :
 Favoris :
 ${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}`;
 
-        const response = await fetch('https://api.deepseek.com/chat/completions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${deepseekApiKey}` },
-          body: JSON.stringify({
+        try {
+          const response = await openai.chat.completions.create({
             model: 'deepseek-flash',
             messages: [
               { role: 'system', content: 'Tu es un système strict qui ne renvoie QUE du JSON valide. Pas de markdown.' },
               { role: 'user', content: prompt }
             ],
             temperature: 0.1
-          })
-        });
+          });
 
-        if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(`Erreur API DeepSeek (lot ${currentBatchNum}) : ${errText}`);
-        }
+          let content = response.choices[0].message.content.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+          const classifications = JSON.parse(content);
 
-        const data = await response.json();
-        let content = data.choices[0].message.content.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
-        const classifications = JSON.parse(content);
-
-        for (const item of classifications) {
-          const { id, theme } = item;
-          const cleanTheme = theme.trim().charAt(0).toUpperCase() + theme.trim().slice(1);
-          if (!knownThemes.includes(cleanTheme)) knownThemes.push(cleanTheme);
-          
-          const bookmarkInfo = batch.find(b => b.id === id);
-          if (bookmarkInfo) {
-            pendingMoves.push({ id: id, title: bookmarkInfo.title, url: bookmarkInfo.url, theme: cleanTheme, source: 'ai' });
+          for (const item of classifications) {
+            const { id, theme } = item;
+            const cleanTheme = theme.trim().charAt(0).toUpperCase() + theme.trim().slice(1);
+            if (!knownThemes.includes(cleanTheme)) knownThemes.push(cleanTheme);
+            
+            const bookmarkInfo = batch.find(b => b.id === id);
+            if (bookmarkInfo) {
+              pendingMoves.push({ id: id, title: bookmarkInfo.title, url: bookmarkInfo.url, theme: cleanTheme, source: 'ai' });
+            }
           }
+        } catch (apiError) {
+          throw new Error(`Erreur API DeepSeek (lot ${currentBatchNum}) : ${apiError.message}`);
         }
       }
     }
