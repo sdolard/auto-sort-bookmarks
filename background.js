@@ -153,7 +153,7 @@ async function generateSortingPreview(force = false) {
 Thématiques déjà existantes : [${knownThemes.join(', ')}]
 
 CONSIGNES STRICTES :
-1. Pour chaque favori, attribue une thématique pertinente.
+1. Pour chaque favori, attribue une thématique pertinente. Tu peux créer des sous-dossiers en utilisant le séparateur '/' si cela a du sens (ex: "Développement/Javascript" ou "Voyage/Hôtels"). Limite-toi à 2 niveaux maximum.
 2. Utilise les thématiques existantes en priorité.
 3. Sinon, crée une NOUVELLE thématique (générique, 1 à 2 mots, majuscule au début).
 4. UNIQUEMENT du JSON valide au format : [{"id": "...", "theme": "..."}]
@@ -244,37 +244,46 @@ async function applyValidatedMoves(moves) {
        });
     }
 
-    // 2. DOSSIERS THÉMATIQUES : Tri alphabétique
+    // 2. DOSSIERS THÉMATIQUES : Tri alphabétique et Sous-dossiers
     const rootFolder = await chrome.bookmarks.create({ title: "Thématiques IA - " + new Date().toLocaleTimeString() });
     
-    // Grouper par thème
+    // Grouper par thème (le thème peut être un chemin complet, ex: "Dev/JS")
     const groupedThemes = {};
     for (const m of themeMoves) {
+       const cleanThemePath = (m.theme || "Divers").split('/').map(s => s.trim()).filter(s => s).join('/');
+       m.theme = cleanThemePath || "Divers";
+       
        if (!groupedThemes[m.theme]) groupedThemes[m.theme] = [];
        groupedThemes[m.theme].push(m);
     }
 
-    // Créer les dossiers par ordre alphabétique avec index explicite
+    // Créer les dossiers par ordre alphabétique
     const sortedThemeNames = Object.keys(groupedThemes).sort((a, b) => a.localeCompare(b));
+    const folderIdCache = {}; // Cache pour ne pas recréer les dossiers parents
 
-    for (let fIdx = 0; fIdx < sortedThemeNames.length; fIdx++) {
-       const theme = sortedThemeNames[fIdx];
-       const folder = await chrome.bookmarks.create({ 
-           parentId: rootFolder.id, 
-           title: theme,
-           index: fIdx // Forcer la position de A à Z (haut vers bas)
-       });
+    for (const themePath of sortedThemeNames) {
+       const parts = themePath.split('/');
+       let currentParentId = rootFolder.id;
        
-       // Trier les favoris dans le dossier par ordre alphabétique
-       const bmarks = groupedThemes[theme];
+       // Construire l'arborescence dossier par dossier
+       for (const part of parts) {
+           const key = `${currentParentId}/${part}`;
+           if (!folderIdCache[key]) {
+               // En créant séquentiellement depuis sortedThemeNames, 
+               // Chrome ajoute à la fin, ce qui garantit l'ordre A-Z.
+               const newFolder = await chrome.bookmarks.create({ parentId: currentParentId, title: part });
+               folderIdCache[key] = newFolder.id;
+           }
+           currentParentId = folderIdCache[key];
+       }
+       
+       // Trier les favoris dans le dossier final par ordre alphabétique
+       const bmarks = groupedThemes[themePath];
        bmarks.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
        
-       for (let bIdx = 0; bIdx < bmarks.length; bIdx++) {
-          const m = bmarks[bIdx];
-          await chrome.bookmarks.move(m.id, { 
-              parentId: folder.id,
-              index: bIdx // Forcer la position de A à Z
-          });
+       for (const m of bmarks) {
+          // On ajoute séquentiellement à la fin (préserve A-Z)
+          await chrome.bookmarks.move(m.id, { parentId: currentParentId });
           bookmarkCache[m.url] = m.theme;
        }
     }

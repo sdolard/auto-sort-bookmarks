@@ -19861,7 +19861,7 @@ ${underline}`);
 Th\xE9matiques d\xE9j\xE0 existantes : [${knownThemes.join(", ")}]
 
 CONSIGNES STRICTES :
-1. Pour chaque favori, attribue une th\xE9matique pertinente.
+1. Pour chaque favori, attribue une th\xE9matique pertinente. Tu peux cr\xE9er des sous-dossiers en utilisant le s\xE9parateur '/' si cela a du sens (ex: "D\xE9veloppement/Javascript" ou "Voyage/H\xF4tels"). Limite-toi \xE0 2 niveaux maximum.
 2. Utilise les th\xE9matiques existantes en priorit\xE9.
 3. Sinon, cr\xE9e une NOUVELLE th\xE9matique (g\xE9n\xE9rique, 1 \xE0 2 mots, majuscule au d\xE9but).
 4. UNIQUEMENT du JSON valide au format : [{"id": "...", "theme": "..."}]
@@ -19934,27 +19934,28 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
           const rootFolder = await chrome.bookmarks.create({ title: "Th\xE9matiques IA - " + (/* @__PURE__ */ new Date()).toLocaleTimeString() });
           const groupedThemes = {};
           for (const m of themeMoves) {
+            const cleanThemePath = (m.theme || "Divers").split("/").map((s) => s.trim()).filter((s) => s).join("/");
+            m.theme = cleanThemePath || "Divers";
             if (!groupedThemes[m.theme]) groupedThemes[m.theme] = [];
             groupedThemes[m.theme].push(m);
           }
           const sortedThemeNames = Object.keys(groupedThemes).sort((a, b) => a.localeCompare(b));
-          for (let fIdx = 0; fIdx < sortedThemeNames.length; fIdx++) {
-            const theme = sortedThemeNames[fIdx];
-            const folder = await chrome.bookmarks.create({
-              parentId: rootFolder.id,
-              title: theme,
-              index: fIdx
-              // Forcer la position de A à Z (haut vers bas)
-            });
-            const bmarks = groupedThemes[theme];
+          const folderIdCache = {};
+          for (const themePath of sortedThemeNames) {
+            const parts = themePath.split("/");
+            let currentParentId = rootFolder.id;
+            for (const part of parts) {
+              const key = `${currentParentId}/${part}`;
+              if (!folderIdCache[key]) {
+                const newFolder = await chrome.bookmarks.create({ parentId: currentParentId, title: part });
+                folderIdCache[key] = newFolder.id;
+              }
+              currentParentId = folderIdCache[key];
+            }
+            const bmarks = groupedThemes[themePath];
             bmarks.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-            for (let bIdx = 0; bIdx < bmarks.length; bIdx++) {
-              const m = bmarks[bIdx];
-              await chrome.bookmarks.move(m.id, {
-                parentId: folder.id,
-                index: bIdx
-                // Forcer la position de A à Z
-              });
+            for (const m of bmarks) {
+              await chrome.bookmarks.move(m.id, { parentId: currentParentId });
               bookmarkCache[m.url] = m.theme;
             }
           }
