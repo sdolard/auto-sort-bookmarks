@@ -5,6 +5,7 @@ global.chrome = {
       addListener: jest.fn(),
     },
     sendMessage: jest.fn().mockResolvedValue(),
+    getURL: jest.fn().mockReturnValue('preview.html')
   },
   storage: {
     local: {
@@ -28,6 +29,9 @@ global.chrome = {
     ]),
     create: jest.fn().mockResolvedValue({ id: 'folder-ai' }),
     move: jest.fn().mockResolvedValue()
+  },
+  tabs: {
+    create: jest.fn()
   }
 };
 
@@ -56,7 +60,7 @@ describe('Tests du Background Script (Worker)', () => {
     expect(chrome.runtime.onMessage.addListener).toHaveBeenCalledTimes(1);
   });
 
-  it('doit traiter correctement le message "startSorting" avec cache et overrides', async () => {
+  it('doit générer une preview au lieu de déplacer directement', async () => {
     require('../background.js');
     const messageListener = chrome.runtime.onMessage.addListener.mock.calls[0][0];
     const sendResponse = jest.fn();
@@ -67,16 +71,33 @@ describe('Tests du Background Script (Worker)', () => {
     
     await new Promise(resolve => setTimeout(resolve, 150));
 
-    // Vérifier les appels d'API
-    expect(chrome.storage.local.get).toHaveBeenCalledWith(['deepseekApiKey', 'bookmarkCache', 'overrides']);
-    expect(chrome.bookmarks.getTree).toHaveBeenCalled();
-    
-    // fetch appelé 1 seule fois car GitHub est traité par les règles (override)
+    // L'API fetch a dû être appelée pour "google.com" (GitHub est en override)
     expect(fetch).toHaveBeenCalledTimes(1);
     
-    // Le dossier devrait avoir une chaîne incluant "Thématiques IA"
-    expect(chrome.bookmarks.create.mock.calls[0][0].title).toMatch(/Thématiques IA/);
-    expect(chrome.bookmarks.move).toHaveBeenCalledTimes(2);
+    // Les résultats doivent être sauvegardés dans pendingMoves
     expect(chrome.storage.local.set).toHaveBeenCalled();
+    const setCall = chrome.storage.local.set.mock.calls[0][0];
+    expect(setCall.pendingMoves).toBeDefined();
+    expect(setCall.pendingMoves.length).toBe(2);
+    
+    // Un onglet doit s'ouvrir
+    expect(chrome.tabs.create).toHaveBeenCalledWith({ url: 'preview.html' });
+  });
+  
+  it('doit appliquer les mouvements validés et mettre en cache', async () => {
+    require('../background.js');
+    const messageListener = chrome.runtime.onMessage.addListener.mock.calls[0][0];
+    const sendResponse = jest.fn();
+    
+    // Simuler la validation via la page preview
+    const moves = [{ id: '1', title: 'Google', url: 'https://google.com', theme: 'Recherche', source: 'ai' }];
+    messageListener({ action: 'applyMoves', moves }, {}, sendResponse);
+    
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    expect(chrome.bookmarks.create).toHaveBeenCalled();
+    expect(chrome.bookmarks.move).toHaveBeenCalled();
+    expect(chrome.storage.local.set).toHaveBeenCalled();
+    expect(sendResponse).toHaveBeenCalledWith({ done: true });
   });
 });

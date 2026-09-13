@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.openOptionsPage();
   });
 
-  function triggerSorting(force = false) {
+  function triggerSortingPreview(force = false) {
     chrome.storage.local.get(['deepseekApiKey'], (result) => {
       if (!result.deepseekApiKey) {
         statusDiv.innerHTML = '<span style="color:red;">Veuillez d\'abord configurer votre clé API.</span>';
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       sortBtn.disabled = true;
       forceBtn.disabled = true;
-      statusDiv.textContent = force ? 'Réorganisation complète en cours...' : 'Analyse des nouveaux favoris en cours...';
+      statusDiv.textContent = force ? 'Analyse complète en cours...' : 'Génération des propositions en cours...';
 
       chrome.runtime.sendMessage({ action: 'startSorting', force: force }, (response) => {
         if (chrome.runtime.lastError) {
@@ -29,10 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  sortBtn.addEventListener('click', () => triggerSorting(false));
+  sortBtn.addEventListener('click', () => triggerSortingPreview(false));
   forceBtn.addEventListener('click', () => {
-    if (confirm("Voulez-vous vraiment ignorer le cache et relancer l'IA sur TOUS les favoris ?")) {
-      triggerSorting(true);
+    if (confirm("Voulez-vous vraiment ignorer le cache et solliciter l'IA pour TOUS les favoris ?")) {
+      triggerSortingPreview(true);
     }
   });
 
