@@ -20,20 +20,13 @@ async function startSortingProcess() {
 
     await updateStatus("Récupération de vos favoris...");
     
-    // 1. Récupérer l'arbre des favoris
     const tree = await chrome.bookmarks.getTree();
-    
-    // 2. Aplatir l'arbre pour récupérer tous les liens (exclure les dossiers)
     const bookmarks = [];
     function extractUrls(node) {
       if (node.url) {
-        // On exclut les favoris qui pourraient déjà être bien classés si besoin, 
-        // ou on les prend tous. Ici, on prend tout.
         bookmarks.push({ id: node.id, title: node.title, url: node.url, parentId: node.parentId });
       }
-      if (node.children) {
-        node.children.forEach(extractUrls);
-      }
+      if (node.children) node.children.forEach(extractUrls);
     }
     extractUrls(tree[0]);
 
@@ -42,75 +35,102 @@ async function startSortingProcess() {
       return;
     }
 
-    await updateStatus(`Analyse de ${bookmarks.length} favoris via DeepSeek...`);
+    // Création du dossier racine pour le tri
+    await updateStatus(`Création du dossier principal...`);
+    const rootFolder = await chrome.bookmarks.create({ title: "Thématiques IA" });
+    
+    const batchSize = 40; // Nombre de favoris par requête pour éviter les limites de contexte
+    let knownThemes = []; // Mémoire des thématiques inventées
+    const themeFolders = {}; // Cache des IDs de dossiers : { "Nom du Thème": "id_du_dossier" }
 
-    // Pour éviter de surcharger l'API, on pourrait traiter par lots (ex: 30 favoris par requête).
-    // Pour cet exemple initial, on prend les 20 premiers s'il y en a beaucoup pour tester
-    // A ADAPTER SELON LE BESOIN REEL
-    const batch = bookmarks.slice(0, 30); 
-    const prompt = `
-Voici une liste de favoris (navigateur web) au format JSON. 
-Pour chaque favori, détermine une thématique pertinente, courte (1 ou 2 mots max, ex: "Développement", "Actualités", "Outils", "Loisirs", "Réseaux Sociaux").
-Retourne UNIQUEMENT un tableau JSON valide contenant des objets avec l'id du favori et le thème proposé. 
-Exemple de sortie : [{"id": "1", "theme": "Développement"}]
+    const totalBatches = Math.ceil(bookmarks.length / batchSize);
 
-Favoris:
+    for (let i = 0; i < bookmarks.length; i += batchSize) {
+      const batch = bookmarks.slice(i, i + batchSize);
+      const currentBatchNum = Math.floor(i / batchSize) + 1;
+      
+      await updateStatus(`Analyse avec DeepSeek (lot ${currentBatchNum}/${totalBatches})...`);
+
+      const prompt = `Tu es un expert en classification web. Voici un lot de favoris.
+
+Thématiques que tu as DÉJÀ inventées lors des lots précédents :
+[${knownThemes.length > 0 ? knownThemes.join(', ') : 'Aucune, tu dois créer les premières.'}]
+
+CONSIGNES STRICTES :
+1. Pour chaque favori, attribue une thématique pertinente.
+2. Essaie en priorité d'utiliser l'une des thématiques DÉJÀ inventées si elle correspond bien.
+3. Si aucune ne correspond, crée une NOUVELLE thématique (générique, 1 à 2 mots, avec une majuscule au début. Ex: Développement, Actualités, Finance).
+4. Ne crée pas de thématiques trop spécifiques (évite de créer "React" et "VueJS", regroupe sous "Développement").
+5. RÉPONSE ATTENDUE : UNIQUEMENT un tableau JSON valide. Aucun texte avant, aucun texte après.
+
+Format exact attendu : [{"id": "...", "theme": "..."}]
+
+Favoris à classer :
 ${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}
 `;
 
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${deepseekApiKey}`
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          { role: 'system', content: 'Tu es un assistant qui classe des sites web en thématiques.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.1 // Température basse pour avoir un résultat déterministe
-      })
-    });
+      const response = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${deepseekApiKey}`
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            { role: 'system', content: 'Tu es un système strict qui ne renvoie QUE du JSON valide. N\'utilise pas de bloc markdown ```json dans ta réponse.' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.1 // Température très basse pour garantir le format JSON et la cohérence
+        })
+      });
 
-    if (!response.ok) {
-        const err = await response.text();
-        throw new Error("Erreur de l'API DeepSeek: " + err);
-    }
-
-    const data = await response.json();
-    const content = data.choices[0].message.content;
-    
-    // Extraire le JSON de la réponse (au cas où il y a des backticks markdown)
-    const jsonStr = content.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
-    const classifications = JSON.parse(jsonStr);
-
-    await updateStatus(`Création des dossiers et déplacement...`);
-    
-    // Créer un dossier principal "Thématiques IA" pour ne pas polluer la barre personnelle
-    const rootFolder = await chrome.bookmarks.create({ title: "Thématiques IA" });
-    
-    // Gérer les dossiers thématiques
-    const themeFolders = {}; // Cache pour ne pas créer le même dossier 2 fois
-    
-    for (const item of classifications) {
-      const { id, theme } = item;
-      
-      // Créer le sous-dossier s'il n'existe pas encore
-      if (!themeFolders[theme]) {
-        const folder = await chrome.bookmarks.create({
-          parentId: rootFolder.id,
-          title: theme
-        });
-        themeFolders[theme] = folder.id;
+      if (!response.ok) {
+          const err = await response.text();
+          throw new Error(`Erreur API DeepSeek (lot ${currentBatchNum}): ` + err);
       }
+
+      const data = await response.json();
+      let content = data.choices[0].message.content;
       
-      // Déplacer le favori
-      await chrome.bookmarks.move(id, { parentId: themeFolders[theme] });
+      // Sécurité : Nettoyage au cas où l'IA mettrait quand même des balises markdown
+      content = content.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+      
+      let classifications;
+      try {
+        classifications = JSON.parse(content);
+      } catch (e) {
+        console.error("Erreur de parsing JSON sur ce lot :", content);
+        throw new Error("DeepSeek a renvoyé un format invalide pour le lot " + currentBatchNum);
+      }
+
+      // Mise à jour de notre taxonomie et déplacement des favoris
+      for (const item of classifications) {
+        const { id, theme } = item;
+        
+        // Formater proprement le thème (majuscule, pas d'espaces superflus)
+        const cleanTheme = theme.trim().charAt(0).toUpperCase() + theme.trim().slice(1);
+
+        // Si le thème est nouveau, on l'ajoute à notre mémoire
+        if (!knownThemes.includes(cleanTheme)) {
+          knownThemes.push(cleanTheme);
+        }
+        
+        // Créer le sous-dossier s'il n'existe pas encore dans ce run
+        if (!themeFolders[cleanTheme]) {
+          const folder = await chrome.bookmarks.create({
+            parentId: rootFolder.id,
+            title: cleanTheme
+          });
+          themeFolders[cleanTheme] = folder.id;
+        }
+        
+        // Déplacer le favori
+        await chrome.bookmarks.move(id, { parentId: themeFolders[cleanTheme] });
+      }
     }
 
-    await updateStatus(`Terminé ! Vos ${batch.length} favoris ont été classés dans le dossier "Thématiques IA".`, true);
+    await updateStatus(`Terminé ! Vos ${bookmarks.length} favoris ont été classés dans "${knownThemes.length}" thématiques.`, true);
 
   } catch (error) {
     console.error(error);
