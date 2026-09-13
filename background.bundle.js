@@ -19874,7 +19874,7 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
                 const response = await openai.chat.completions.create({
                   model: "deepseek-flash",
                   messages: [
-                    { role: "system", content: "Tu es un syst\xE8me strict qui ne renvoie QUE du JSON valide. Pas de markdown." },
+                    { role: "system", content: chrome.i18n.getMessage("aiSystem") || "You are a strict system that ONLY returns valid JSON. No markdown." },
                     { role: "user", content: prompt }
                   ],
                   temperature: 0.1
