@@ -222,10 +222,20 @@ async function generateSortingPreview(force = false) {
       return (a.title || "").localeCompare(b.title || "");
     });
 
-    // Sauvegarder les propositions et ouvrir la page d'aperçu
+    // Sauvegarder les propositions et ouvrir/focus la page d'aperçu
     await updateStatus(chrome.i18n.getMessage('bgOpeningPreview'));
     await chrome.storage.local.set({ pendingMoves: pendingMoves });
-    chrome.tabs.create({ url: chrome.runtime.getURL("preview.html") });
+    
+    const previewUrl = chrome.runtime.getURL("preview.html");
+    chrome.tabs.query({ url: previewUrl }, (tabs) => {
+      if (tabs && tabs.length > 0) {
+        chrome.tabs.update(tabs[0].id, { active: true });
+        chrome.windows.update(tabs[0].windowId, { focused: true });
+      } else {
+        chrome.tabs.create({ url: previewUrl });
+      }
+    });
+
     await updateStatus(chrome.i18n.getMessage('bgDone'), true);
 
   } catch (error) {

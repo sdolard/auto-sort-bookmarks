@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Rafraîchissement automatique si de nouvelles données arrivent depuis le popup/background
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local' && changes.pendingMoves) {
+      window.location.reload();
+    }
+  });
+
   const previewTable = document.getElementById('previewTable');
   const selectAll = document.getElementById('selectAll');
   const applyBtn = document.getElementById('applyBtn');
