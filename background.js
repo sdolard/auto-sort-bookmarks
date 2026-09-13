@@ -156,10 +156,6 @@ async function generateSortingPreview(force = false) {
           .replace('__BOOKMARKS__', JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url}))));
 
         try {
-          console.log("=== ENVOI À DEEPSEEK (Batch " + currentBatchNum + ") ===");
-          console.log("System Prompt: ", chrome.i18n.getMessage('aiSystem') || 'You are a strict system that ONLY returns valid JSON. No markdown.');
-          console.log("User Prompt: ", prompt);
-
           const response = await openai.chat.completions.create({
             model: 'deepseek-flash',
             messages: [
@@ -170,9 +166,6 @@ async function generateSortingPreview(force = false) {
           });
 
           let content = response.choices[0].message.content.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
-          console.log("=== RÉPONSE BRUTE DE DEEPSEEK ===");
-          console.log(content);
-          
           const classifications = JSON.parse(content);
 
           for (const item of classifications) {

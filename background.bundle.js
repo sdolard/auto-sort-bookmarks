@@ -19861,9 +19861,6 @@ ${underline}`);
               const promptBase = chrome.i18n.getMessage("aiPrompt");
               const prompt = promptBase.replace("__THEMES__", knownThemes.join(", ")).replace("__BOOKMARKS__", JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url }))));
               try {
-                console.log("=== ENVOI \xC0 DEEPSEEK (Batch " + currentBatchNum + ") ===");
-                console.log("System Prompt: ", chrome.i18n.getMessage("aiSystem") || "You are a strict system that ONLY returns valid JSON. No markdown.");
-                console.log("User Prompt: ", prompt);
                 const response = await openai.chat.completions.create({
                   model: "deepseek-flash",
                   messages: [
@@ -19873,8 +19870,6 @@ ${underline}`);
                   temperature: 0.4
                 });
                 let content = response.choices[0].message.content.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
-                console.log("=== R\xC9PONSE BRUTE DE DEEPSEEK ===");
-                console.log(content);
                 const classifications = JSON.parse(content);
                 for (const item of classifications) {
                   const { id, theme } = item;
