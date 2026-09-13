@@ -1,4 +1,4 @@
-# DeepSeek Bookmark Organizer 🔖🤖
+# AI Bookmark Organizer 🔖🤖
 
 Une extension Chrome intelligente qui utilise l'IA (modèle ultra-rapide DeepSeek-Flash) pour trier, catégoriser et organiser automatiquement vos favoris web, avec un respect maniaque de l'ordre.
 

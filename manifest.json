@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "DeepSeek Bookmark Organizer",
+  "name": "AI Bookmark Organizer",
   "version": "1.0",
-  "description": "Trie et organise automatiquement vos favoris par thématique grâce à l'IA DeepSeek.",
+  "description": "Trie et organise automatiquement vos favoris par thématique grâce à l'IA.",
   "permissions": [
     "bookmarks",
     "storage",
