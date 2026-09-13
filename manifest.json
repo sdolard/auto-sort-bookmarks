@@ -13,7 +13,17 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "__MSG_extName__"
+    "default_title": "__MSG_extName__",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
   },
   "options_page": "options.html",
   "background": {
