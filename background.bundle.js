@@ -19864,6 +19864,24 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
             bookmarkCache[move.url] = move.theme;
           }
           await chrome.storage.local.set({ bookmarkCache, pendingMoves: [] });
+          async function cleanNode(node) {
+            if (node.children) {
+              for (const child of node.children) {
+                await cleanNode(child);
+              }
+              const freshNode = (await chrome.bookmarks.getSubTree(node.id))[0];
+              if (freshNode.children && freshNode.children.length === 0 && !["0", "1", "2", "3"].includes(node.id)) {
+                try {
+                  await chrome.bookmarks.remove(node.id);
+                } catch (e) {
+                }
+              }
+            }
+          }
+          const fullTree = await chrome.bookmarks.getTree();
+          for (const rootChild of fullTree[0].children) {
+            await cleanNode(rootChild);
+          }
         } catch (error) {
           console.error("Erreur lors de l'application des mouvements :", error);
         }

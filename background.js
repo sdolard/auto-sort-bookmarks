@@ -171,6 +171,31 @@ async function applyValidatedMoves(moves) {
     // Sauvegarder le cache mis à jour et vider les pendingMoves
     await chrome.storage.local.set({ bookmarkCache: bookmarkCache, pendingMoves: [] });
     
+    // --- NOUVEAU : Nettoyage des dossiers désormais vides ---
+    async function cleanNode(node) {
+      if (node.children) {
+        // Nettoyer d'abord les enfants (Bottom-Up)
+        for (const child of node.children) {
+          await cleanNode(child);
+        }
+        // Vérifier si le dossier courant est maintenant vide
+        const freshNode = (await chrome.bookmarks.getSubTree(node.id))[0];
+        // On ne supprime pas les dossiers racines de Chrome (ids souvent '0', '1', '2', '3')
+        if (freshNode.children && freshNode.children.length === 0 && !['0', '1', '2', '3'].includes(node.id)) {
+          try { 
+            await chrome.bookmarks.remove(node.id); 
+          } catch (e) {
+            // Ignorer l'erreur si le dossier est verrouillé par le système
+          }
+        }
+      }
+    }
+    
+    const fullTree = await chrome.bookmarks.getTree();
+    for (const rootChild of fullTree[0].children) {
+      await cleanNode(rootChild);
+    }
+    
   } catch (error) {
     console.error("Erreur lors de l'application des mouvements :", error);
   }

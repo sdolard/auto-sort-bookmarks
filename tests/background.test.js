@@ -20,13 +20,16 @@ global.chrome = {
   bookmarks: {
     getTree: jest.fn().mockResolvedValue([
       {
-        id: 'root',
+        id: '0',
         children: [
           { id: '1', title: 'Google', url: 'https://google.com' },
-          { id: '2', title: 'GitHub', url: 'https://github.com' }
+          { id: '2', title: 'GitHub', url: 'https://github.com' },
+          { id: 'folder-to-delete', title: 'Empty', children: [] }
         ]
       }
     ]),
+    getSubTree: jest.fn().mockResolvedValue([{ id: 'folder-to-delete', children: [] }]),
+    remove: jest.fn().mockResolvedValue(),
     create: jest.fn().mockResolvedValue({ id: 'folder-ai' }),
     move: jest.fn().mockResolvedValue()
   },
