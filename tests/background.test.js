@@ -36,6 +36,9 @@ global.chrome = {
   history: {
     getVisits: jest.fn().mockResolvedValue([])
   },
+  i18n: {
+    getMessage: jest.fn().mockImplementation((key) => key)
+  },
   tabs: {
     create: jest.fn()
   }

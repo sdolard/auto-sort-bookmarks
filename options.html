@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Options - AI Bookmark Organizer</title>
+  <title data-i18n="optionsTitle">Options - AI Bookmark Organizer</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; }
     label { font-weight: bold; margin-top: 15px; display: block; }
@@ -15,28 +15,24 @@
   </style>
 </head>
 <body>
-  <h2>Configuration de l'Extension</h2>
+  <h2 data-i18n="optionsTitle">Configuration de l'Extension</h2>
   
-  <label for="apiKey">Clé API DeepSeek :</label>
+  <label for="apiKey" data-i18n="apiKeyLabel">Clé API DeepSeek :</label>
   <input type="password" id="apiKey" placeholder="sk-..." />
-  <div class="help">Nécessaire pour l'analyse par l'IA.</div>
+  <div class="help" data-i18n="apiKeyHelp">Nécessaire pour l'analyse par l'IA.</div>
 
-  <label for="topCount">Garder les favoris les plus visités dans la Barre :</label>
+  <label for="topCount" data-i18n="topCountLabel">Garder les favoris les plus visités dans la Barre :</label>
   <input type="number" id="topCount" value="10" min="0" max="50" style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;" />
-  <div class="help">Les X favoris les plus cliqués seront placés directement sur la barre de favoris. Mettez 0 pour désactiver.</div>
+  <div class="help" data-i18n="topCountHelp">Les X favoris les plus cliqués seront placés directement sur la barre de favoris. Mettez 0 pour désactiver.</div>
 
-  <label for="overrides">Surcharges / Règles Manuelles (Optionnel) :</label>
-  <div class="help">
-    Forcez des thématiques pour certaines adresses web. Format : <code>morceau-url = Thème</code> (un par ligne).<br>
-    <em>Le script cherche ce mot dans l'URL (le nom du favori n'a pas d'importance).</em><br>
-    Exemple : <code>github.com = Développement</code><br>
-    <strong>Astuce :</strong> Utilisez <code>morceau-url = PIN</code> pour épingler de force un favori sur la barre.
-  </div>
-  <textarea id="overrides" placeholder="youtube.com = Vidéos&#10;amazon = Shopping&#10;mon-site.fr = PIN"></textarea>
+  <label for="overrides" data-i18n="overridesLabel">Surcharges / Règles Manuelles (Optionnel) :</label>
+  <div class="help" data-i18n="overridesHelp"></div>
+  <textarea id="overrides" data-i18n="overridesPlaceholder" placeholder="youtube.com = Vidéos&#10;amazon = Shopping&#10;mon-site.fr = PIN"></textarea>
 
-  <button id="saveBtn">Enregistrer les paramètres</button>
-  <button id="saveAndSortBtn" style="background-color: #2196F3; margin-left: 10px;">Enregistrer & Lancer l'aperçu</button>
+  <button id="saveBtn" data-i18n="saveBtn">Enregistrer les paramètres</button>
+  <button id="saveAndSortBtn" style="background-color: #2196F3; margin-left: 10px;" data-i18n="saveAndSortBtn">Enregistrer & Lancer l'aperçu</button>
   <div id="status"></div>
   <script src="options.js"></script>
+  <script src="i18n.js"></script>
 </body>
 </html>

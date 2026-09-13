@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Vérifier si un tri est déjà en cours
   chrome.runtime.sendMessage({ action: 'getStatus' }, (response) => {
     if (response && response.isSorting) {
-      statusDiv.textContent = response.currentStatus || 'Tri en cours...';
+      statusDiv.textContent = response.currentStatus || chrome.i18n.getMessage('statusGeneratingPreview');
       statusDiv.className = 'status processing';
       sortBtn.disabled = true;
       forceBtn.disabled = true;
@@ -21,13 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function triggerSortingPreview(force = false) {
     chrome.storage.local.get(['deepseekApiKey'], (result) => {
       if (!result.deepseekApiKey) {
-        statusDiv.innerHTML = '<span style="color:red;">Veuillez d\'abord configurer votre clé API.</span>';
+        statusDiv.innerHTML = chrome.i18n.getMessage('popupMissingKey');
         return;
       }
 
       sortBtn.disabled = true;
       forceBtn.disabled = true;
-      statusDiv.textContent = force ? 'Analyse complète en cours...' : 'Génération des propositions en cours...';
+      statusDiv.textContent = force ? chrome.i18n.getMessage('statusFullAnalysis') : chrome.i18n.getMessage('statusGeneratingPreview');
 
       chrome.runtime.sendMessage({ action: 'startSorting', force: force }, (response) => {
         if (chrome.runtime.lastError) {
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   sortBtn.addEventListener('click', () => triggerSortingPreview(false));
   forceBtn.addEventListener('click', () => {
-    if (confirm("Voulez-vous vraiment ignorer le cache et solliciter l'IA pour TOUS les favoris ?")) {
+    if (confirm(chrome.i18n.getMessage('popupForceConfirm'))) {
       triggerSortingPreview(true);
     }
   });

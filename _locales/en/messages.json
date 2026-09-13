@@ -1,0 +1,134 @@
+{
+  "extName": {
+    "message": "AI Bookmark Organizer"
+  },
+  "extDesc": {
+    "message": "Automatically sorts and organizes your bookmarks by theme using AI."
+  },
+  "optionsTitle": {
+    "message": "Extension Configuration"
+  },
+  "apiKeyLabel": {
+    "message": "DeepSeek API Key:"
+  },
+  "apiKeyHelp": {
+    "message": "Required for AI analysis."
+  },
+  "topCountLabel": {
+    "message": "Keep most visited bookmarks in the Bar:"
+  },
+  "topCountHelp": {
+    "message": "The top X most clicked bookmarks will be placed directly on the bookmarks bar. Set to 0 to disable."
+  },
+  "overridesLabel": {
+    "message": "Overrides / Manual Rules (Optional):"
+  },
+  "overridesHelp": {
+    "message": "Force themes for specific web addresses. Format: <code>url-fragment = Theme</code> (one per line).<br><em>The script searches for this word in the URL (bookmark name doesn't matter).</em><br>Example: <code>github.com = Development</code><br><strong>Tip:</strong> Use <code>url-fragment = PIN</code> to force pin a bookmark to the bar."
+  },
+  "overridesPlaceholder": {
+    "message": "youtube.com = Videos\namazon = Shopping\nmy-site.com = PIN"
+  },
+  "saveBtn": {
+    "message": "Save Settings"
+  },
+  "saveAndSortBtn": {
+    "message": "Save & Preview"
+  },
+  "statusSaved": {
+    "message": "Settings saved successfully!"
+  },
+  "statusErrorApiKey": {
+    "message": "Error: Please enter an API key first."
+  },
+  "statusGeneratingPreview": {
+    "message": "Generating preview..."
+  },
+  "statusFullAnalysis": {
+    "message": "Full analysis in progress..."
+  },
+  "statusReady": {
+    "message": "Status: Ready"
+  },
+  "popupConfigBtn": {
+    "message": "Configuration"
+  },
+  "popupSortBtn": {
+    "message": "Generate sorting preview"
+  },
+  "popupForceBtn": {
+    "message": "Force analysis (Ignore cache)"
+  },
+  "popupMissingKey": {
+    "message": "Please configure your API key first."
+  },
+  "popupForceConfirm": {
+    "message": "Are you sure you want to ignore the cache and ask the AI for ALL bookmarks?"
+  },
+  "previewTitle": {
+    "message": "AI Sorting Preview"
+  },
+  "previewDesc": {
+    "message": "Here are the move proposals. Uncheck those you want to ignore."
+  },
+  "thBookmark": {
+    "message": "Bookmark"
+  },
+  "thTheme": {
+    "message": "New Theme"
+  },
+  "thSource": {
+    "message": "Source"
+  },
+  "btnApply": {
+    "message": "Validate and Move"
+  },
+  "btnCancel": {
+    "message": "Cancel"
+  },
+  "statusNoPending": {
+    "message": "No data to display. Please restart the analysis."
+  },
+  "statusApplying": {
+    "message": "Moving bookmarks..."
+  },
+  "statusFinished": {
+    "message": "Completed! You can close this tab."
+  },
+  "bgMissingKey": {
+    "message": "Missing API Key"
+  },
+  "bgFetching": {
+    "message": "Fetching your bookmarks..."
+  },
+  "bgNoBookmarks": {
+    "message": "No bookmarks found."
+  },
+  "bgHistory": {
+    "message": "Analyzing visit history..."
+  },
+  "bgApiError": {
+    "message": "DeepSeek API Error (batch $BATCH$): $MSG$"
+  },
+  "bgAiAnalysis": {
+    "message": "AI Analysis (batch $CUR$/$TOT$)..."
+  },
+  "bgOpeningPreview": {
+    "message": "Opening preview page..."
+  },
+  "bgDone": {
+    "message": "Done."
+  },
+  "bgUnexpectedError": {
+    "message": "Unexpected error: $MSG$"
+  },
+  "bookmarksBar": {
+    "message": "⭐ Bookmarks Bar"
+  },
+  "aiThemesFolder": {
+    "message": "AI Themes - "
+  },
+  "aiPrompt": {
+    "message": "You are an expert in web classification. Here is a batch of bookmarks.\n\nExisting themes: [$THEMES$]\n\nSTRICT INSTRUCTIONS:\n1. For each bookmark, assign a relevant theme. You can create subfolders using the '/' separator if it makes sense (e.g., \"Development/Javascript\" or \"Travel/Hotels\"). Limit to 2 levels maximum.\n2. Use existing themes with priority.\n3. Otherwise, create a NEW theme (generic, 1 to 2 words, capitalized).\n4. Reply ONLY with valid JSON in this format: [{\"id\": \"...\", \"theme\": \"...\"}]\n\nBookmarks:\n$BOOKMARKS$"
+  }
+}

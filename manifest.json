@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AI Bookmark Organizer",
+  "name": "__MSG_extName__",
   "version": "1.0",
-  "description": "Trie et organise automatiquement vos favoris par thématique grâce à l'IA.",
+  "description": "__MSG_extDesc__",
   "permissions": [
     "bookmarks",
     "storage",
@@ -13,10 +13,11 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Organiser les favoris"
+    "default_title": "__MSG_extName__"
   },
   "options_page": "options.html",
   "background": {
     "service_worker": "background.bundle.js"
-  }
+  },
+  "default_locale": "en"
 }

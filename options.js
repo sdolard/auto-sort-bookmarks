@@ -18,10 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
       topCount: topCount
     }, () => {
       const status = document.getElementById('status');
-      status.textContent = 'Paramètres enregistrés avec succès !';
+      status.textContent = chrome.i18n.getMessage('statusSaved');
       status.style.color = 'green';
       setTimeout(() => { 
-        if (status.textContent === 'Paramètres enregistrés avec succès !') status.textContent = ''; 
+        if (status.textContent === chrome.i18n.getMessage('statusSaved')) status.textContent = ''; 
       }, 3000);
       if (callback) callback(apiKey);
     });
@@ -35,12 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
     saveOptions((apiKey) => {
       const status = document.getElementById('status');
       if (!apiKey) {
-        status.textContent = "Erreur : Veuillez d'abord saisir une clé API.";
+        status.textContent = chrome.i18n.getMessage('statusErrorApiKey');
         status.style.color = 'red';
         return;
       }
       
-      status.textContent = "Génération de l'aperçu en cours...";
+      status.textContent = chrome.i18n.getMessage('statusGeneratingPreview');
       status.style.color = 'blue';
       
       chrome.runtime.sendMessage({ action: 'startSorting', force: false }, (response) => {

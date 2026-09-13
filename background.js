@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     currentStatus = "Démarrage...";
     generateSortingPreview(message.force).catch(e => {
       isSorting = false;
-      updateStatus(`Erreur inattendue : ${e.message}`, true);
+      updateStatus(chrome.i18n.getMessage('bgUnexpectedError').replace('$MSG$', e.message), true);
     });
     sendResponse({ started: true });
     return true;
@@ -41,7 +41,7 @@ async function generateSortingPreview(force = false) {
     const overridesText = data.overrides || "";
     const topCount = data.topCount !== undefined ? parseInt(data.topCount) : 10;
     
-    if (!deepseekApiKey) throw new Error("Clé API manquante");
+    if (!deepseekApiKey) throw new Error(chrome.i18n.getMessage('bgMissingKey'));
     if (force) bookmarkCache = {};
 
     // Initialiser le client OpenAI pour DeepSeek
@@ -56,7 +56,7 @@ async function generateSortingPreview(force = false) {
       .filter(parts => parts.length === 2)
       .map(([key, value]) => [key.trim().toLowerCase(), value.trim()]);
 
-    await updateStatus("Récupération de vos favoris...");
+    await updateStatus(chrome.i18n.getMessage('bgFetching'));
     
     const tree = await chrome.bookmarks.getTree();
     let allBookmarks = [];
@@ -69,12 +69,12 @@ async function generateSortingPreview(force = false) {
     extractUrls(tree[0]);
 
     if (allBookmarks.length === 0) {
-      await updateStatus("Aucun favori trouvé.", true);
+      await updateStatus(chrome.i18n.getMessage('bgNoBookmarks'), true);
       return;
     }
 
     if (topCount > 0) {
-      await updateStatus("Analyse de l'historique des visites...");
+      await updateStatus(chrome.i18n.getMessage('bgHistory'));
       const visitsPromises = allBookmarks.map(async (b) => {
         try {
           const visits = await chrome.history.getVisits({ url: b.url });
@@ -103,7 +103,7 @@ async function generateSortingPreview(force = false) {
           id: b.id, 
           title: b.title, 
           url: b.url, 
-          theme: "⭐ Barre de favoris", 
+          theme: chrome.i18n.getMessage('bookmarksBar'), 
           source: 'history',
           targetParentId: '1' // ID standard de la barre de favoris Chrome
         });
@@ -119,7 +119,7 @@ async function generateSortingPreview(force = false) {
             id: b.id, 
             title: b.title, 
             url: b.url, 
-            theme: isPinned ? "⭐ Barre de favoris" : theme, 
+            theme: isPinned ? chrome.i18n.getMessage('bookmarksBar') : theme, 
             source: 'override',
             targetParentId: isPinned ? '1' : undefined
           });
@@ -147,7 +147,7 @@ async function generateSortingPreview(force = false) {
         const batch = toAskAI.slice(i, i + batchSize);
         const currentBatchNum = Math.floor(i / batchSize) + 1;
         
-        await updateStatus(`Analyse IA (lot ${currentBatchNum}/${totalBatches})...`);
+        await updateStatus(chrome.i18n.getMessage('bgAiAnalysis').replace('$CUR$', currentBatchNum).replace('$TOT$', totalBatches));
 
         const prompt = `Tu es un expert en classification web. Voici un lot de favoris.
 
@@ -186,7 +186,7 @@ ${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}`;
             }
           }
         } catch (apiError) {
-          throw new Error(`Erreur API DeepSeek (lot ${currentBatchNum}) : ${apiError.message}`);
+          throw new Error(chrome.i18n.getMessage('bgApiError').replace('$BATCH$', currentBatchNum).replace('$MSG$', apiError.message));
         }
       }
     }
@@ -230,10 +230,10 @@ ${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}`;
     });
 
     // Sauvegarder les propositions et ouvrir la page d'aperçu
-    await updateStatus(`Ouverture de la page d'aperçu...`);
+    await updateStatus(chrome.i18n.getMessage('bgOpeningPreview'));
     await chrome.storage.local.set({ pendingMoves: pendingMoves });
     chrome.tabs.create({ url: chrome.runtime.getURL("preview.html") });
-    await updateStatus(`Terminé.`, true);
+    await updateStatus(chrome.i18n.getMessage('bgDone'), true);
 
   } catch (error) {
     console.error(error);
@@ -270,7 +270,7 @@ async function applyValidatedMoves(moves) {
     }
 
     // 2. DOSSIERS THÉMATIQUES : Tri alphabétique et Sous-dossiers
-    const rootFolder = await chrome.bookmarks.create({ title: "Thématiques IA - " + new Date().toLocaleTimeString() });
+    const rootFolder = await chrome.bookmarks.create({ title: chrome.i18n.getMessage('aiThemesFolder') + new Date().toLocaleTimeString() });
     
     // Grouper par thème (le thème peut être un chemin complet, ex: "Dev/JS")
     const groupedThemes = {};

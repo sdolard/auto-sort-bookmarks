@@ -19749,7 +19749,7 @@ ${underline}`);
           currentStatus = "D\xE9marrage...";
           generateSortingPreview(message.force).catch((e) => {
             isSorting = false;
-            updateStatus(`Erreur inattendue : ${e.message}`, true);
+            updateStatus(chrome.i18n.getMessage("bgUnexpectedError").replace("$MSG$", e.message), true);
           });
           sendResponse({ started: true });
           return true;
@@ -19778,7 +19778,7 @@ ${underline}`);
           let bookmarkCache = data.bookmarkCache || {};
           const overridesText = data.overrides || "";
           const topCount = data.topCount !== void 0 ? parseInt(data.topCount) : 10;
-          if (!deepseekApiKey) throw new Error("Cl\xE9 API manquante");
+          if (!deepseekApiKey) throw new Error(chrome.i18n.getMessage("bgMissingKey"));
           if (force) bookmarkCache = {};
           const openai = new OpenAI({
             baseURL: "https://api.deepseek.com",
@@ -19786,16 +19786,16 @@ ${underline}`);
             dangerouslyAllowBrowser: true
           });
           const overrideRules = overridesText.split("\n").map((line) => line.split("=")).filter((parts) => parts.length === 2).map(([key, value]) => [key.trim().toLowerCase(), value.trim()]);
-          await updateStatus("R\xE9cup\xE9ration de vos favoris...");
+          await updateStatus(chrome.i18n.getMessage("bgFetching"));
           const tree = await chrome.bookmarks.getTree();
           let allBookmarks = [];
           extractUrls(tree[0]);
           if (allBookmarks.length === 0) {
-            await updateStatus("Aucun favori trouv\xE9.", true);
+            await updateStatus(chrome.i18n.getMessage("bgNoBookmarks"), true);
             return;
           }
           if (topCount > 0) {
-            await updateStatus("Analyse de l'historique des visites...");
+            await updateStatus(chrome.i18n.getMessage("bgHistory"));
             const visitsPromises = allBookmarks.map(async (b) => {
               try {
                 const visits = await chrome.history.getVisits({ url: b.url });
@@ -19818,7 +19818,7 @@ ${underline}`);
                 id: b.id,
                 title: b.title,
                 url: b.url,
-                theme: "\u2B50 Barre de favoris",
+                theme: chrome.i18n.getMessage("bookmarksBar"),
                 source: "history",
                 targetParentId: "1"
                 // ID standard de la barre de favoris Chrome
@@ -19834,7 +19834,7 @@ ${underline}`);
                   id: b.id,
                   title: b.title,
                   url: b.url,
-                  theme: isPinned ? "\u2B50 Barre de favoris" : theme,
+                  theme: isPinned ? chrome.i18n.getMessage("bookmarksBar") : theme,
                   source: "override",
                   targetParentId: isPinned ? "1" : void 0
                 });
@@ -19856,7 +19856,7 @@ ${underline}`);
             for (let i = 0; i < toAskAI.length; i += batchSize) {
               const batch = toAskAI.slice(i, i + batchSize);
               const currentBatchNum = Math.floor(i / batchSize) + 1;
-              await updateStatus(`Analyse IA (lot ${currentBatchNum}/${totalBatches})...`);
+              await updateStatus(chrome.i18n.getMessage("bgAiAnalysis").replace("$CUR$", currentBatchNum).replace("$TOT$", totalBatches));
               const prompt = `Tu es un expert en classification web. Voici un lot de favoris.
 
 Th\xE9matiques d\xE9j\xE0 existantes : [${knownThemes.join(", ")}]
@@ -19890,7 +19890,7 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
                   }
                 }
               } catch (apiError) {
-                throw new Error(`Erreur API DeepSeek (lot ${currentBatchNum}) : ${apiError.message}`);
+                throw new Error(chrome.i18n.getMessage("bgApiError").replace("$BATCH$", currentBatchNum).replace("$MSG$", apiError.message));
               }
             }
           }
@@ -19921,10 +19921,10 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
             if (themeDiff !== 0) return themeDiff;
             return (a.title || "").localeCompare(b.title || "");
           });
-          await updateStatus(`Ouverture de la page d'aper\xE7u...`);
+          await updateStatus(chrome.i18n.getMessage("bgOpeningPreview"));
           await chrome.storage.local.set({ pendingMoves });
           chrome.tabs.create({ url: chrome.runtime.getURL("preview.html") });
-          await updateStatus(`Termin\xE9.`, true);
+          await updateStatus(chrome.i18n.getMessage("bgDone"), true);
         } catch (error) {
           console.error(error);
           await updateStatus(`Erreur : ${error.message}`, true);
@@ -19952,7 +19952,7 @@ ${JSON.stringify(batch.map((b) => ({ id: b.id, title: b.title, url: b.url })))}`
               // Place au tout début (à gauche) de la barre
             });
           }
-          const rootFolder = await chrome.bookmarks.create({ title: "Th\xE9matiques IA - " + (/* @__PURE__ */ new Date()).toLocaleTimeString() });
+          const rootFolder = await chrome.bookmarks.create({ title: chrome.i18n.getMessage("aiThemesFolder") + (/* @__PURE__ */ new Date()).toLocaleTimeString() });
           const groupedThemes = {};
           for (const m of themeMoves) {
             const cleanThemePath = (m.theme || "Divers").split("/").map((s) => s.trim()).filter((s) => s).join("/");
