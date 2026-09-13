@@ -98,7 +98,7 @@ ${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}`;
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${deepseekApiKey}` },
           body: JSON.stringify({
-            model: 'deepseek-v4.1-flash',
+            model: 'deepseek-flash',
             messages: [
               { role: 'system', content: 'Tu es un système strict qui ne renvoie QUE du JSON valide. Pas de markdown.' },
               { role: 'user', content: prompt }
@@ -107,7 +107,10 @@ ${JSON.stringify(batch.map(b => ({id: b.id, title: b.title, url: b.url})))}`;
           })
         });
 
-        if (!response.ok) throw new Error(`Erreur API DeepSeek (lot ${currentBatchNum})`);
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(`Erreur API DeepSeek (lot ${currentBatchNum}) : ${errText}`);
+        }
 
         const data = await response.json();
         let content = data.choices[0].message.content.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
