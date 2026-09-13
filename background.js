@@ -113,7 +113,15 @@ async function generateSortingPreview(force = false) {
       let matchedOverride = false;
       for (const [keyword, theme] of overrideRules) {
         if (urlLower.includes(keyword)) {
-          pendingMoves.push({ id: b.id, title: b.title, url: b.url, theme: theme, source: 'override' });
+          const isPinned = theme === 'pin' || theme === 'barre';
+          pendingMoves.push({ 
+            id: b.id, 
+            title: b.title, 
+            url: b.url, 
+            theme: isPinned ? "⭐ Barre de favoris" : theme, 
+            source: 'override',
+            targetParentId: isPinned ? '1' : undefined
+          });
           matchedOverride = true;
           break;
         }

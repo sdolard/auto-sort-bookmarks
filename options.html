@@ -26,8 +26,12 @@
   <div class="help">Les X favoris les plus cliqués seront placés directement sur la barre de favoris. Mettez 0 pour désactiver.</div>
 
   <label for="overrides">Surcharges / Règles Manuelles (Optionnel) :</label>
-  <div class="help">Forcez des thématiques par mots-clés. Format : <code>mot-clé = Thème</code> (un par ligne).<br>Exemple : <code>github.com = Développement</code></div>
-  <textarea id="overrides" placeholder="youtube.com = Vidéos&#10;amazon = Shopping"></textarea>
+  <div class="help">
+    Forcez des thématiques par mots-clés. Format : <code>mot-clé = Thème</code> (un par ligne).<br>
+    Exemple : <code>github.com = Développement</code><br>
+    <strong>Astuce :</strong> Utilisez <code>mot-clé = PIN</code> pour épingler de force un favori sur la barre.
+  </div>
+  <textarea id="overrides" placeholder="youtube.com = Vidéos&#10;amazon = Shopping&#10;mon-site.fr = PIN"></textarea>
 
   <button id="saveBtn">Enregistrer les paramètres</button>
   <div id="status"></div>
